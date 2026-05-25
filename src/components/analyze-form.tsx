@@ -41,14 +41,13 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
       isHovering && !isDisabled && !isPressing
         ? "translateY(-1px)"
         : "translateY(0)",
-    filter: isDisabled
-      ? "saturate(0.85)"
-      : isHovering && !isPressing
+    filter:
+      isHovering && !isPressing && !isDisabled
         ? "brightness(1.05) saturate(1.05)"
-        : isPressing
+        : isPressing && !isDisabled
           ? "brightness(0.96)"
           : "none",
-    opacity: isDisabled ? 0.6 : 1,
+    opacity: 1,
     cursor: isDisabled ? "not-allowed" : "pointer",
     transition:
       "transform 100ms ease, box-shadow 200ms ease, filter 200ms ease",

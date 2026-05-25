@@ -39,9 +39,6 @@ export function SiteHeader({ variant = "transparent" }: Props) {
             </div>
           </div>
         </Link>
-        <span className="hidden text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:inline">
-          Module Konsole
-        </span>
       </div>
     </header>
   );

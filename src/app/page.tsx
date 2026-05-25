@@ -64,9 +64,9 @@ export default function HomePage() {
 
         <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-20 sm:py-28">
 
-          <h1 className="text-gradient-hero mt-6 max-w-3xl text-balance text-center text-4xl font-semibold tracking-tight sm:text-5xl md:text-[3.5rem] md:leading-[1.05]">
+          <h1 className="text-gradient-hero mt-6 max-w-4xl text-center text-5xl sm:text-6xl md:text-7xl">
             Du site web au compte qualifié,
-            <br className="hidden sm:block" />{" "}
+            <br />
             en quelques secondes.
           </h1>
 
