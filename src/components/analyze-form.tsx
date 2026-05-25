@@ -37,7 +37,7 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
           type="submit"
           size="default"
           disabled={isLoading || value.trim().length === 0}
-          className="h-11 gap-2 bg-brand px-5 text-brand-foreground hover:bg-brand/90"
+          className="btn-scout h-11 gap-2 px-5"
         >
           {isLoading ? (
             <>

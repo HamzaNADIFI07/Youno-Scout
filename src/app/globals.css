@@ -51,10 +51,10 @@
 }
 
 :root {
-  --background: oklch(0.965 0.015 70);
-  --foreground: oklch(0.22 0.035 45);
-  --card: oklch(0.99 0.008 70);
-  --card-foreground: oklch(0.22 0.035 45);
+  --background: #f5f5eb;
+  --foreground: #090505;
+  --card: #ffffff;
+  --card-foreground: #090505;
   --popover: oklch(0.99 0.008 70);
   --popover-foreground: oklch(0.22 0.035 45);
   --primary: oklch(0.65 0.155 35);
@@ -136,10 +136,34 @@
 
 .hero-grid {
   background-image:
-    linear-gradient(to right, color-mix(in oklch, var(--brand) 18%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklch, var(--brand) 18%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, rgb(208 92 53 / 0.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(208 92 53 / 0.18) 1px, transparent 1px);
   background-size: 64px 64px;
   background-position: center;
   mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
+}
+
+.btn-scout {
+  background-image: linear-gradient(135deg, #d05c35 0%, #e89476 100%);
+  color: #ffffff;
+  transition: filter 200ms ease, box-shadow 200ms ease, transform 100ms ease;
+}
+
+.btn-scout:hover:not(:disabled) {
+  filter: brightness(0.95);
+  box-shadow: 0 10px 24px -12px rgb(208 92 53 / 0.45);
+}
+
+.btn-scout:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.text-gradient-hero {
+  background-image: linear-gradient(135deg, #090505 0%, #745452 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }

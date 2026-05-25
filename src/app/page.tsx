@@ -67,7 +67,7 @@ export default function HomePage() {
             Account discovery
           </span>
 
-          <h1 className="mt-6 max-w-3xl text-balance text-center text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-[3.5rem] md:leading-[1.05]">
+          <h1 className="text-gradient-hero mt-6 max-w-3xl text-balance text-center text-4xl font-semibold tracking-tight sm:text-5xl md:text-[3.5rem] md:leading-[1.05]">
             Du site web au compte qualifié,
             <br className="hidden sm:block" />{" "}
             en quelques secondes.
