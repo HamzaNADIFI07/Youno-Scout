@@ -34,7 +34,7 @@ export default function PremiumPage() {
 
   return (
     <>
-      <SiteHeader variant="bordered" />
+      <SiteHeader variant="bordered" showPremiumCta={false} />
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10 sm:py-14">
         <Link
           href="/"
