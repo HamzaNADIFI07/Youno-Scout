@@ -86,15 +86,18 @@ export const SignalIdSchema = z.enum([
   "contact-email",
   "contact-phone",
   "contact-form",
-  "enterprise-tier",
+  "crm-hubspot",
+  "crm-salesforce",
+  "tracking-ip-based",
+  "payment-stripe",
+  "support-chat",
+  "model-plg",
+  "model-enterprise",
+  "public-pricing",
   "case-studies",
   "compliance-badges",
   "active-careers",
-  "funding-mention",
   "international-presence",
-  "public-pricing",
-  "developer-docs",
-  "modern-stack",
 ]);
 export type SignalId = z.infer<typeof SignalIdSchema>;
 

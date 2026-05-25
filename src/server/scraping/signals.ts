@@ -11,18 +11,13 @@ type SignalInput = {
   selectedSignals?: SignalId[];
 };
 
-const FUNDING_PATTERNS =
-  /\b(series\s+[a-d]\b|seed\s+round|pre-seed|raised?\s+\$?\d|\$\s?\d+(?:\.\d+)?\s?(?:k|m|million|b|billion)\b|funded\s+by|backed\s+by|our\s+investors|venture\s+(?:capital|fund))/i;
+const PLG_PATTERNS =
+  /\b(free trial|start (for )?free|get started free|try (it )?free|try for free|essai gratuit|commencer gratuitement|s’inscrire gratuitement|sign up for free)\b/i;
 
-const MODERN_FRAMEWORK_NAMES = new Set([
-  "Next.js",
-  "Nuxt",
-  "Astro",
-  "Svelte",
-  "Remix",
-  "React",
-  "Vue",
-]);
+const ENTERPRISE_PATTERNS =
+  /\b(book a demo|request (a )?demo|get a demo|schedule (a )?demo|contact sales|talk to sales|talk to an expert|reserver (une )?demo|demander une demo|contacter les ventes|parler (a|à) un expert)\b/i;
+
+const TRACKING_IP_TOOLS = new Set(["Koala", "Albacross", "Clearbit"]);
 
 export function detectSignals(input: SignalInput): Signal[] {
   const evidences = computeEvidences(input);
@@ -43,7 +38,7 @@ export function detectSignals(input: SignalInput): Signal[] {
 
 function computeEvidences(input: SignalInput): Partial<Record<SignalId, string>> {
   const result: Partial<Record<SignalId, string>> = {};
-  const { primary, html, contacts, techStack } = input;
+  const { primary, contacts, techStack } = input;
 
   if (contacts.emails.length > 0) {
     result["contact-email"] = `${contacts.emails[0]}${
@@ -64,12 +59,51 @@ function computeEvidences(input: SignalInput): Partial<Record<SignalId, string>>
       : "Mention « contact » trouvée";
   }
 
-  if (
-    /\benterprise\b|for teams|for companies|grands comptes|grandes entreprises/i.test(
-      primary.mainText
-    )
-  ) {
-    result["enterprise-tier"] = "Mention « Enterprise » ou « for teams »";
+  const techNames = techStack.flatMap((c) => c.items.map((i) => i.name));
+
+  if (techNames.includes("HubSpot")) {
+    result["crm-hubspot"] = "Scripts HubSpot détectés sur la page";
+  }
+
+  if (techNames.includes("Salesforce")) {
+    result["crm-salesforce"] = "Scripts Salesforce détectés";
+  }
+
+  const ipTools = techNames.filter((n) => TRACKING_IP_TOOLS.has(n));
+  if (ipTools.length > 0) {
+    result["tracking-ip-based"] = `Outils détectés : ${ipTools.join(", ")}`;
+  }
+
+  if (techNames.includes("Stripe")) {
+    result["payment-stripe"] = "Stripe.js détecté → modèle transactionnel";
+  }
+
+  const supportTools = techStack
+    .find((c) => c.category === "support")
+    ?.items.map((i) => i.name) ?? [];
+  if (supportTools.length > 0) {
+    result["support-chat"] = `Widget détecté : ${supportTools.join(", ")}`;
+  }
+
+  const plgCta = primary.actionableLinks.find((l) => PLG_PATTERNS.test(l.text));
+  if (plgCta || PLG_PATTERNS.test(primary.mainText)) {
+    result["model-plg"] = plgCta
+      ? `CTA : « ${plgCta.text} »`
+      : "Mention d’un essai gratuit dans la copy";
+  }
+
+  const enterpriseCta = primary.actionableLinks.find((l) =>
+    ENTERPRISE_PATTERNS.test(l.text)
+  );
+  if (enterpriseCta) {
+    result["model-enterprise"] = `CTA : « ${enterpriseCta.text} »`;
+  }
+
+  const pricing = primary.internalLinks.find((p) =>
+    /\/(pricing|tarifs?|plans|prix)(\/|$)/i.test(p)
+  );
+  if (pricing) {
+    result["public-pricing"] = `Lien ${pricing}`;
   }
 
   const customers = primary.internalLinks.find((p) =>
@@ -97,35 +131,9 @@ function computeEvidences(input: SignalInput): Partial<Record<SignalId, string>>
     result["active-careers"] = `Lien ${careers}`;
   }
 
-  const funding = primary.mainText.match(FUNDING_PATTERNS);
-  if (funding) {
-    result["funding-mention"] = `Mention : « ${funding[0].trim()} »`;
-  }
-
-  const hreflangCount = (html.match(/hreflang=/gi) ?? []).length;
+  const hreflangCount = (input.html.match(/hreflang=/gi) ?? []).length;
   if (hreflangCount >= 2) {
     result["international-presence"] = `${hreflangCount} balises hreflang détectées`;
-  }
-
-  const pricing = primary.internalLinks.find((p) =>
-    /\/(pricing|tarifs?|plans|prix)(\/|$)/i.test(p)
-  );
-  if (pricing) {
-    result["public-pricing"] = `Lien ${pricing}`;
-  }
-
-  const docs = primary.internalLinks.find((p) =>
-    /\/(docs?|developers?|api|reference)(\/|$)/i.test(p)
-  );
-  if (docs) {
-    result["developer-docs"] = `Lien ${docs}`;
-  }
-
-  const modernFrameworks = techStack
-    .flatMap((c) => c.items.map((i) => i.name))
-    .filter((name) => MODERN_FRAMEWORK_NAMES.has(name));
-  if (modernFrameworks.length > 0) {
-    result["modern-stack"] = `Framework : ${modernFrameworks.join(", ")}`;
   }
 
   return result;
