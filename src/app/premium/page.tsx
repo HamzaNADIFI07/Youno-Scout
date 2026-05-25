@@ -3,10 +3,13 @@
 import { ArrowLeft, ArrowRight, Globe, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { BusinessStep } from "@/components/premium/business-step";
 import { PremiumStepper } from "@/components/premium/premium-stepper";
+import { SignalsStep } from "@/components/premium/signals-step";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Input } from "@/components/ui/input";
+import type { CustomSignal } from "@/lib/types";
 
 const STEPS = [
   { number: 1, label: "Site cible" },
@@ -23,13 +26,83 @@ const BTN_SHADOW = [
   "0 1px 2px rgba(0,0,0,0.08)",
 ].join(", ");
 
+type GenerateError = { error?: string };
+
 export default function PremiumPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [url, setUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [signals, setSignals] = useState<CustomSignal[]>([]);
+  const [isMutating, setIsMutating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
-  const handleNextFromStep1 = () => {
-    if (url.trim().length === 0) return;
-    setCurrentStep(2);
+  const callGenerate = async (body: {
+    description: string;
+    targetUrl?: string;
+    currentSignals?: CustomSignal[];
+    instruction?: string;
+  }): Promise<CustomSignal[] | null> => {
+    setIsMutating(true);
+    setGenerationError(null);
+    try {
+      const response = await fetch("/api/generate-signals", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as GenerateError;
+        setGenerationError(
+          data.error ?? "Génération impossible. Veuillez réessayer."
+        );
+        return null;
+      }
+      const data = (await response.json()) as { signals: CustomSignal[] };
+      return data.signals;
+    } catch {
+      setGenerationError("Connexion impossible. Vérifiez votre réseau.");
+      return null;
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
+  const handleGenerate = async () => {
+    const next = await callGenerate({
+      description,
+      targetUrl: url.trim() || undefined,
+    });
+    if (next) {
+      setSignals(next);
+      setCurrentStep(3);
+    }
+  };
+
+  const handleApplyInstruction = async (instruction: string) => {
+    const next = await callGenerate({
+      description,
+      targetUrl: url.trim() || undefined,
+      currentSignals: signals,
+      instruction,
+    });
+    if (next) setSignals(next);
+  };
+
+  const handleRegenerate = async () => {
+    const next = await callGenerate({
+      description,
+      targetUrl: url.trim() || undefined,
+    });
+    if (next) setSignals(next);
+  };
+
+  const handleDelete = (id: string) => {
+    setSignals((current) => current.filter((s) => s.id !== id));
+  };
+
+  const goToStep = (step: number) => {
+    setGenerationError(null);
+    setCurrentStep(step);
   };
 
   return (
@@ -76,13 +149,41 @@ export default function PremiumPage() {
             <UrlStep
               url={url}
               onChange={setUrl}
-              onNext={handleNextFromStep1}
+              onNext={() => goToStep(2)}
             />
           ) : null}
 
-          {currentStep === 2 ? <BusinessStepPlaceholder /> : null}
-          {currentStep === 3 ? <SignalsStepPlaceholder /> : null}
-          {currentStep === 4 ? <RunStepPlaceholder /> : null}
+          {currentStep === 2 ? (
+            <BusinessStep
+              description={description}
+              onDescriptionChange={setDescription}
+              isGenerating={isMutating}
+              error={generationError}
+              onGenerate={handleGenerate}
+              onBack={() => goToStep(1)}
+            />
+          ) : null}
+
+          {currentStep === 3 ? (
+            <SignalsStep
+              signals={signals}
+              onDelete={handleDelete}
+              onApplyInstruction={handleApplyInstruction}
+              onRegenerate={handleRegenerate}
+              onContinue={() => goToStep(4)}
+              onBack={() => goToStep(2)}
+              isMutating={isMutating}
+              error={generationError}
+            />
+          ) : null}
+
+          {currentStep === 4 ? (
+            <RunStepPlaceholder
+              url={url}
+              signalsCount={signals.length}
+              onBack={() => goToStep(3)}
+            />
+          ) : null}
         </section>
       </main>
       <SiteFooter />
@@ -158,41 +259,34 @@ function UrlStep({
   );
 }
 
-function BusinessStepPlaceholder() {
+function RunStepPlaceholder({
+  url,
+  signalsCount,
+  onBack,
+}: {
+  url: string;
+  signalsCount: number;
+  onBack: () => void;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
       <h2 className="text-lg font-semibold tracking-tight">
-        Décrivez votre entreprise et votre ICP
+        Récapitulatif et lancement
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Cette étape arrive dans la phase suivante.
+        Nous allons analyser <span className="font-medium text-foreground">{url}</span>{" "}
+        avec {signalsCount} signaux personnalisés.
       </p>
-    </div>
-  );
-}
-
-function SignalsStepPlaceholder() {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
-      <h2 className="text-lg font-semibold tracking-tight">
-        Vos signaux GTM générés
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Cette étape arrive dans la phase suivante.
+      <p className="mt-4 text-xs text-muted-foreground">
+        Le lancement de l’analyse arrive dans la prochaine phase.
       </p>
-    </div>
-  );
-}
-
-function RunStepPlaceholder() {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
-      <h2 className="text-lg font-semibold tracking-tight">
-        Lancement de l’analyse
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Cette étape arrive dans la phase suivante.
-      </p>
+      <button
+        type="button"
+        onClick={onBack}
+        className="mt-6 text-xs font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+      >
+        ← Modifier les signaux
+      </button>
     </div>
   );
 }
