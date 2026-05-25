@@ -294,24 +294,6 @@ type SignalDefinition = {
 
 export const SIGNAL_DEFINITIONS: SignalDefinition[] = [
   {
-    id: "contact-email",
-    label: "Email de contact",
-    category: "go-to-market",
-    weight: 7,
-  },
-  {
-    id: "contact-phone",
-    label: "Téléphone",
-    category: "go-to-market",
-    weight: 5,
-  },
-  {
-    id: "contact-form",
-    label: "Formulaire de contact",
-    category: "go-to-market",
-    weight: 3,
-  },
-  {
     id: "crm-used",
     label: "CRM utilisé",
     category: "product",
@@ -324,46 +306,22 @@ export const SIGNAL_DEFINITIONS: SignalDefinition[] = [
     weight: 10,
   },
   {
-    id: "payment-solution",
-    label: "Solution de paiement",
+    id: "marketing-automation",
+    label: "Marketing automation",
     category: "product",
-    weight: 6,
+    weight: 7,
   },
   {
-    id: "support-chat",
-    label: "Chat support",
-    category: "product",
-    weight: 4,
-  },
-  {
-    id: "model-plg",
-    label: "Modèle Product-Led (auto-onboarding)",
-    category: "go-to-market",
-    weight: 6,
-  },
-  {
-    id: "model-enterprise",
-    label: "Modèle Sales-Led (demo / contact sales)",
+    id: "sales-model",
+    label: "Modèle de vente",
     category: "go-to-market",
     weight: 9,
   },
   {
     id: "public-pricing",
-    label: "Pricing public",
+    label: "Pricing publié",
     category: "go-to-market",
-    weight: 4,
-  },
-  {
-    id: "case-studies",
-    label: "Études de cas publiées",
-    category: "maturity",
-    weight: 7,
-  },
-  {
-    id: "compliance-badges",
-    label: "Conformité",
-    category: "maturity",
-    weight: 8,
+    weight: 5,
   },
   {
     id: "active-careers",
@@ -372,10 +330,28 @@ export const SIGNAL_DEFINITIONS: SignalDefinition[] = [
     weight: 10,
   },
   {
+    id: "funding-mention",
+    label: "Levée de fonds",
+    category: "growth",
+    weight: 10,
+  },
+  {
     id: "international-presence",
     label: "Présence internationale",
     category: "growth",
-    weight: 5,
+    weight: 6,
+  },
+  {
+    id: "compliance-badges",
+    label: "Conformité",
+    category: "maturity",
+    weight: 8,
+  },
+  {
+    id: "case-studies",
+    label: "Études de cas",
+    category: "maturity",
+    weight: 7,
   },
 ];
 

@@ -2,6 +2,8 @@ import { Clock } from "lucide-react";
 import { CompanyHeader } from "@/components/result/company-header";
 import { ContactsCard } from "@/components/result/contacts-card";
 import { DescriptionCard } from "@/components/result/description-card";
+import { LegalCard } from "@/components/result/legal-card";
+import { PeopleCard } from "@/components/result/people-card";
 import { ScoreCard } from "@/components/result/score-card";
 import { SignalsCard } from "@/components/result/signals-card";
 import { TechStackCard } from "@/components/result/tech-stack-card";
@@ -20,6 +22,10 @@ export function ResultView({ result }: Props) {
       <DescriptionCard result={result} />
 
       <ContactsCard contacts={result.contacts} />
+
+      <PeopleCard people={result.people} />
+
+      <LegalCard legal={result.legal} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <ScoreCard icp={result.icp} />

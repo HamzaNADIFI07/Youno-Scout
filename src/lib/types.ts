@@ -53,6 +53,18 @@ export const LlmCompanyInsightSchema = z.object({
     .describe(
       "Confidence in the extraction quality, from 0 (very low) to 1 (very high)."
     ),
+  people: z
+    .array(
+      z.object({
+        fullName: z.string(),
+        role: z.string().optional(),
+      })
+    )
+    .max(20)
+    .optional()
+    .describe(
+      "People explicitly mentioned on the page : founders, team members, testimonials. Empty array if none."
+    ),
 });
 export type LlmCompanyInsight = z.infer<typeof LlmCompanyInsightSchema>;
 
@@ -83,20 +95,16 @@ export const TechStackSchema = z.array(
 export type TechStack = z.infer<typeof TechStackSchema>;
 
 export const SignalIdSchema = z.enum([
-  "contact-email",
-  "contact-phone",
-  "contact-form",
   "crm-used",
   "tracking-stack",
-  "payment-solution",
-  "support-chat",
-  "model-plg",
-  "model-enterprise",
+  "marketing-automation",
+  "sales-model",
   "public-pricing",
-  "case-studies",
-  "compliance-badges",
   "active-careers",
+  "funding-mention",
   "international-presence",
+  "compliance-badges",
+  "case-studies",
 ]);
 export type SignalId = z.infer<typeof SignalIdSchema>;
 
@@ -161,6 +169,27 @@ export const ContactsSchema = z.object({
 });
 export type Contacts = z.infer<typeof ContactsSchema>;
 
+export const LegalInfoSchema = z.object({
+  legalName: z.string().optional(),
+  legalForm: z.string().optional(),
+  registrationNumber: z.string().optional(),
+  vatNumber: z.string().optional(),
+  shareCapital: z.string().optional(),
+  rcs: z.string().optional(),
+  headquartersAddress: z.string().optional(),
+  publicationDirector: z.string().optional(),
+  hostingProvider: z.string().optional(),
+  legalPageUrl: z.string().optional(),
+});
+export type LegalInfo = z.infer<typeof LegalInfoSchema>;
+
+export const PersonSchema = z.object({
+  fullName: z.string(),
+  role: z.string().optional(),
+  source: z.string().optional(),
+});
+export type Person = z.infer<typeof PersonSchema>;
+
 export const AnalysisResultSchema = z.object({
   url: z.string().url(),
   finalUrl: z.string().url(),
@@ -170,6 +199,8 @@ export const AnalysisResultSchema = z.object({
   techStack: TechStackSchema,
   signals: z.array(SignalSchema),
   contacts: ContactsSchema,
+  legal: LegalInfoSchema,
+  people: z.array(PersonSchema),
   icp: IcpScoreSchema,
   meta: z.object({
     title: z.string().optional(),

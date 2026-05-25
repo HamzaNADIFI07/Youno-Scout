@@ -1,10 +1,20 @@
-import type { AnalysisResult, CustomSignal, SignalId } from "@/lib/types";
+import type {
+  AnalysisResult,
+  CustomSignal,
+  LegalInfo,
+  Person,
+  SignalId,
+} from "@/lib/types";
 import { FetchError, fetchPage, normalizeUrl } from "@/server/scraping/fetcher";
 import { extractPage } from "@/server/scraping/extractor";
 import { extractContacts } from "@/server/scraping/contacts";
 import { detectTechStack } from "@/server/scraping/tech-stack";
 import { detectSignals } from "@/server/scraping/signals";
 import { detectCustomSignals } from "@/server/scraping/custom-signals";
+import {
+  extractLegalInfo,
+  findLegalPagePath,
+} from "@/server/scraping/legal-extractor";
 import { LlmError, analyzeWithLlm } from "@/server/llm/analyzer";
 import { scoreIcp } from "@/server/scoring/icp-scorer";
 
@@ -100,6 +110,29 @@ export async function runDiscovery(
     throw new DiscoveryError("LLM analysis failed.", "llm-failed");
   }
 
+  const legal = await extractLegalFromSite({
+    baseUrl: fetched.finalUrl,
+    internalLinks: primary.internalLinks,
+  });
+
+  const people: Person[] = (company.people ?? []).map((p) => ({
+    fullName: p.fullName,
+    role: p.role,
+    source: "homepage",
+  }));
+  if (legal.publicationDirector) {
+    const alreadyListed = people.some(
+      (p) => p.fullName.toLowerCase() === legal.publicationDirector!.toLowerCase()
+    );
+    if (!alreadyListed) {
+      people.push({
+        fullName: legal.publicationDirector,
+        role: "Directeur de la publication",
+        source: "mentions-legales",
+      });
+    }
+  }
+
   const icp = scoreIcp({ company, signals, techStack });
 
   return {
@@ -111,6 +144,8 @@ export async function runDiscovery(
     techStack,
     signals,
     contacts,
+    legal,
+    people,
     icp,
     meta: {
       title: primary.title,
@@ -120,4 +155,20 @@ export async function runDiscovery(
       language: primary.language,
     },
   };
+}
+
+async function extractLegalFromSite(input: {
+  baseUrl: string;
+  internalLinks: string[];
+}): Promise<LegalInfo> {
+  const path = findLegalPagePath(input.internalLinks);
+  if (!path) return {};
+
+  try {
+    const fullUrl = new URL(path, input.baseUrl).toString();
+    const legalFetched = await fetchPage(fullUrl);
+    return extractLegalInfo({ html: legalFetched.html, pageUrl: fullUrl });
+  } catch {
+    return {};
+  }
 }

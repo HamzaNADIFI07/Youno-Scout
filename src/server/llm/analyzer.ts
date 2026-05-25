@@ -12,6 +12,7 @@ Rules:
 - Keep descriptions concise and free of marketing fluff.
 - Toujours répondre en français, peu importe la langue du site analysé. Traduire si nécessaire.
 - L'industrie doit être un terme français en minuscules avec tirets (ex. "fintech", "outils-marketing", "logiciel-rh", "e-commerce").
+- Pour le champ "people" : extrait UNIQUEMENT les personnes explicitement nommées sur la page (prénom + nom complet). Mentionne fondateurs, dirigeants, équipe affichée, témoignages clients avec leur nom et fonction. Si aucune personne n'est nommée, retourne un tableau vide.
 - Always call the submit_company_brief function with your final answer.`;
 
 export class LlmError extends Error {
@@ -70,6 +71,28 @@ const INPUT_SCHEMA = {
       description:
         "Confiance dans la qualité d'extraction, de 0 (très faible) à 1 (très élevée).",
     },
+    people: {
+      type: "array",
+      maxItems: 20,
+      items: {
+        type: "object",
+        properties: {
+          fullName: {
+            type: "string",
+            description:
+              "Nom complet de la personne (prénom + nom) telle qu'elle apparaît sur la page.",
+          },
+          role: {
+            type: "string",
+            description:
+              "Fonction ou rôle si mentionné (ex. : CEO, Co-fondateur, Head of Sales). Optionnel.",
+          },
+        },
+        required: ["fullName"],
+      },
+      description:
+        "Personnes explicitement nommées sur la page (fondateurs, équipe, témoignages clients). Retourne un tableau vide si aucune personne identifiée.",
+    },
   },
   required: [
     "name",
@@ -82,6 +105,7 @@ const INPUT_SCHEMA = {
     "valueProposition",
     "pricingPublicly",
     "confidence",
+    "people",
   ],
 };
 
