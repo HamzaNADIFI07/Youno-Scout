@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 
 type Props = {
@@ -10,7 +11,55 @@ type Props = {
   isLoading: boolean;
 };
 
+const BASE_SHADOW = [
+  "inset 0 1px 0 rgba(255,255,255,0.65)",
+  "inset 0 -1px 0 rgba(0,0,0,0.18)",
+  "inset 0 0 0 1px rgba(196,80,42,0.35)",
+  "0 10px 22px -6px rgba(208,92,53,0.55)",
+  "0 2px 4px rgba(0,0,0,0.1)",
+].join(", ");
+
+const HOVER_SHADOW = [
+  "inset 0 1px 0 rgba(255,255,255,0.7)",
+  "inset 0 -1px 0 rgba(0,0,0,0.2)",
+  "inset 0 0 0 1px rgba(196,80,42,0.4)",
+  "0 14px 28px -6px rgba(208,92,53,0.6)",
+  "0 4px 8px rgba(0,0,0,0.12)",
+].join(", ");
+
 export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
+  const [isHovering, setIsHovering] = useState(false);
+  const [isPressing, setIsPressing] = useState(false);
+
+  const isDisabled = isLoading || value.trim().length === 0;
+
+  const buttonStyle: React.CSSProperties = {
+    backgroundImage:
+      "linear-gradient(180deg, #f2a387 0%, #e0654a 55%, #c4502a 100%)",
+    color: "#ffffff",
+    borderRadius: "12px",
+    border: "none",
+    fontWeight: 500,
+    textShadow: "0 1px 0 rgba(0,0,0,0.2)",
+    boxShadow:
+      isHovering && !isDisabled && !isPressing ? HOVER_SHADOW : BASE_SHADOW,
+    transform:
+      isHovering && !isDisabled && !isPressing
+        ? "translateY(-1px)"
+        : "translateY(0)",
+    filter: isDisabled
+      ? "saturate(0.6)"
+      : isHovering && !isPressing
+        ? "brightness(1.06) saturate(1.08)"
+        : isPressing
+          ? "brightness(0.96)"
+          : "none",
+    opacity: isDisabled ? 0.55 : 1,
+    cursor: isDisabled ? "not-allowed" : "pointer",
+    transition:
+      "transform 100ms ease, box-shadow 200ms ease, filter 200ms ease",
+  };
+
   return (
     <form
       onSubmit={(event) => {
@@ -19,7 +68,7 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
       }}
       className="w-full"
     >
-      <div className="flex w-full items-center gap-2 rounded-xl border border-border bg-background p-1.5 shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-4 focus-within:ring-(--brand)/15">
+      <div className="flex w-full items-center gap-2 rounded-xl border border-border bg-background p-1.5 shadow-sm transition-shadow focus-within:shadow-md">
         <Input
           type="text"
           inputMode="url"
@@ -34,8 +83,16 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
         />
         <button
           type="submit"
-          disabled={isLoading || value.trim().length === 0}
-          className="btn-scout inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-7 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#d05c35]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          disabled={isDisabled}
+          style={buttonStyle}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => {
+            setIsHovering(false);
+            setIsPressing(false);
+          }}
+          onMouseDown={() => setIsPressing(true)}
+          onMouseUp={() => setIsPressing(false)}
+          className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap px-7 text-sm outline-none"
         >
           {isLoading ? (
             <>
