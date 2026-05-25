@@ -104,6 +104,7 @@ export const SignalSchema = z.object({
   category: z.enum(["maturity", "go-to-market", "product", "growth"]),
   detected: z.boolean(),
   weight: z.number(),
+  selected: z.boolean(),
   evidence: z.string().optional(),
 });
 export type Signal = z.infer<typeof SignalSchema>;
@@ -157,6 +158,7 @@ export const AnalyzeRequestSchema = z.object({
     .min(3)
     .max(2048)
     .transform((value) => value.trim()),
+  selectedSignals: z.array(SignalIdSchema).optional(),
 });
 export type AnalyzeRequest = z.infer<typeof AnalyzeRequestSchema>;
 

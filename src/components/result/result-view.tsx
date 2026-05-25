@@ -16,12 +16,12 @@ export function ResultView({ result }: Props) {
     <div className="space-y-6">
       <CompanyHeader result={result} />
 
+      <DescriptionCard result={result} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <ScoreCard icp={result.icp} />
         <SignalsCard signals={result.signals} />
       </div>
-
-      <DescriptionCard result={result} />
 
       <TechStackCard techStack={result.techStack} />
 

@@ -96,8 +96,9 @@ function scoreBusinessModel(company: LlmCompanyInsight): ScoreBreakdownEntry {
 
 function scoreSignals(signals: Signal[]): ScoreBreakdownEntry {
   const max = ICP_SIGNALS_MAX;
-  const totalWeight = signals.reduce((sum, s) => sum + s.weight, 0);
-  const detectedWeight = signals
+  const eligible = signals.filter((s) => s.selected);
+  const totalWeight = eligible.reduce((sum, s) => sum + s.weight, 0);
+  const detectedWeight = eligible
     .filter((s) => s.detected)
     .reduce((sum, s) => sum + s.weight, 0);
 
@@ -106,8 +107,11 @@ function scoreSignals(signals: Signal[]): ScoreBreakdownEntry {
       ? 0
       : Math.round((detectedWeight / totalWeight) * max);
 
-  const detectedCount = signals.filter((s) => s.detected).length;
-  const reasoning = `${detectedCount} signaux GTM sur ${signals.length} détectés (poids ${detectedWeight}/${totalWeight}).`;
+  const detectedCount = eligible.filter((s) => s.detected).length;
+  const reasoning =
+    eligible.length === 0
+      ? "Aucun signal GTM sélectionné."
+      : `${detectedCount} signaux sur ${eligible.length} retenus détectés (poids ${detectedWeight}/${totalWeight}).`;
 
   return {
     category: "Signaux GTM",
@@ -165,7 +169,9 @@ function scoreTech(techStack: TechStack): ScoreBreakdownEntry {
 
 function scoreMaturity(signals: Signal[]): ScoreBreakdownEntry {
   const max = ICP_MATURITY_MAX;
-  const maturitySignals = signals.filter((s) => s.category === "maturity");
+  const maturitySignals = signals.filter(
+    (s) => s.category === "maturity" && s.selected
+  );
   const detected = maturitySignals.filter((s) => s.detected);
 
   const totalWeight = maturitySignals.reduce((sum, s) => sum + s.weight, 0);
@@ -175,9 +181,11 @@ function scoreMaturity(signals: Signal[]): ScoreBreakdownEntry {
     totalWeight === 0 ? 0 : Math.round((detectedWeight / totalWeight) * max);
 
   const reasoning =
-    detected.length === 0
-      ? "Aucun marqueur de maturité visible."
-      : `Marqueurs détectés : ${detected.map((s) => s.label).join(", ")}.`;
+    maturitySignals.length === 0
+      ? "Aucun signal de maturité dans la sélection."
+      : detected.length === 0
+        ? "Aucun marqueur de maturité visible."
+        : `Marqueurs détectés : ${detected.map((s) => s.label).join(", ")}.`;
 
   return {
     category: "Maturité",

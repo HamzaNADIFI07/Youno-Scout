@@ -1,4 +1,4 @@
-import type { AnalysisResult } from "@/lib/types";
+import type { AnalysisResult, SignalId } from "@/lib/types";
 import { FetchError, fetchPage, normalizeUrl } from "@/server/scraping/fetcher";
 import { extractPage } from "@/server/scraping/extractor";
 import { detectTechStack } from "@/server/scraping/tech-stack";
@@ -22,7 +22,14 @@ export class DiscoveryError extends Error {
   }
 }
 
-export async function runDiscovery(rawUrl: string): Promise<AnalysisResult> {
+type DiscoveryOptions = {
+  selectedSignals?: SignalId[];
+};
+
+export async function runDiscovery(
+  rawUrl: string,
+  options: DiscoveryOptions = {}
+): Promise<AnalysisResult> {
   const startedAt = Date.now();
 
   let url: string;
@@ -58,6 +65,7 @@ export async function runDiscovery(rawUrl: string): Promise<AnalysisResult> {
     html: fetched.html,
     headers: fetched.headers,
     techStack,
+    selectedSignals: options.selectedSignals,
   });
 
   let company;

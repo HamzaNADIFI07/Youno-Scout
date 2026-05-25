@@ -7,10 +7,14 @@ type SignalInput = {
   html: string;
   headers: Record<string, string>;
   techStack: TechStack;
+  selectedSignals?: SignalId[];
 };
 
 export function detectSignals(input: SignalInput): Signal[] {
   const evidences = computeEvidences(input);
+  const selectedSet = input.selectedSignals
+    ? new Set(input.selectedSignals)
+    : null;
 
   return SIGNAL_DEFINITIONS.map((def) => ({
     id: def.id,
@@ -18,6 +22,7 @@ export function detectSignals(input: SignalInput): Signal[] {
     category: def.category,
     weight: def.weight,
     detected: Boolean(evidences[def.id]),
+    selected: selectedSet === null || selectedSet.has(def.id),
     evidence: evidences[def.id],
   }));
 }
