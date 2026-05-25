@@ -83,18 +83,21 @@ export const TechStackSchema = z.array(
 export type TechStack = z.infer<typeof TechStackSchema>;
 
 export const SignalIdSchema = z.enum([
+  "contact-email",
+  "contact-phone",
+  "contact-form",
+  "linkedin-company",
+  "github-public",
+  "twitter-x-presence",
+  "demo-cta",
+  "free-trial-cta",
+  "contact-sales-cta",
   "public-pricing",
   "enterprise-tier",
-  "api-or-integrations",
-  "customer-logos",
+  "developer-docs",
+  "compliance-badges",
   "case-studies",
   "active-careers",
-  "compliance-badges",
-  "multilingual",
-  "blog-active",
-  "newsletter-signup",
-  "live-chat",
-  "open-graph-set",
 ]);
 export type SignalId = z.infer<typeof SignalIdSchema>;
 
@@ -133,6 +136,31 @@ export const IcpScoreSchema = z.object({
 });
 export type IcpScore = z.infer<typeof IcpScoreSchema>;
 
+export const SocialPlatformSchema = z.enum([
+  "linkedin",
+  "twitter",
+  "github",
+  "facebook",
+  "instagram",
+  "youtube",
+  "tiktok",
+]);
+export type SocialPlatform = z.infer<typeof SocialPlatformSchema>;
+
+export const SocialLinkSchema = z.object({
+  platform: SocialPlatformSchema,
+  url: z.string(),
+});
+export type SocialLink = z.infer<typeof SocialLinkSchema>;
+
+export const ContactsSchema = z.object({
+  emails: z.array(z.string()),
+  phones: z.array(z.string()),
+  socials: z.array(SocialLinkSchema),
+  hasContactForm: z.boolean(),
+});
+export type Contacts = z.infer<typeof ContactsSchema>;
+
 export const AnalysisResultSchema = z.object({
   url: z.string().url(),
   finalUrl: z.string().url(),
@@ -141,6 +169,7 @@ export const AnalysisResultSchema = z.object({
   company: LlmCompanyInsightSchema,
   techStack: TechStackSchema,
   signals: z.array(SignalSchema),
+  contacts: ContactsSchema,
   icp: IcpScoreSchema,
   meta: z.object({
     title: z.string().optional(),

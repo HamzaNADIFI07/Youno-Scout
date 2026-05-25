@@ -1,5 +1,10 @@
 import * as cheerio from "cheerio";
 
+export type LinkWithText = {
+  href: string;
+  text: string;
+};
+
 export type ExtractedPage = {
   title?: string;
   description?: string;
@@ -12,7 +17,11 @@ export type ExtractedPage = {
   mainText: string;
   internalLinks: string[];
   externalLinks: string[];
+  externalLinksFull: string[];
   scriptSrcs: string[];
+  mailtoLinks: string[];
+  telLinks: string[];
+  actionableLinks: LinkWithText[];
   rawHeadHtml: string;
   rawBodyHtml: string;
 };
@@ -42,35 +51,70 @@ export function extractPage(html: string, pageUrl: string): ExtractedPage {
     ? safeResolve(faviconHref, base)
     : safeResolve("/favicon.ico", base);
 
-  $("script, style, noscript, svg, path").remove();
+  const $forContent = cheerio.load(html);
+  $forContent("script, style, noscript, svg, path").remove();
 
   const internalLinks = new Set<string>();
   const externalLinks = new Set<string>();
+  const externalLinksFull = new Set<string>();
+  const mailtoLinks = new Set<string>();
+  const telLinks = new Set<string>();
+  const actionableLinks: LinkWithText[] = [];
+
   $("a[href]").each((_, el) => {
-    const href = $(el).attr("href");
+    const $el = $(el);
+    const href = $el.attr("href");
     if (!href) return;
-    const resolved = safeResolve(href, base);
+    const trimmed = href.trim();
+    const linkText = $el.text().trim().replace(/\s+/g, " ");
+
+    if (trimmed.startsWith("mailto:")) {
+      const value = trimmed.slice("mailto:".length).split("?")[0].trim();
+      if (value) mailtoLinks.add(value);
+      return;
+    }
+    if (trimmed.startsWith("tel:")) {
+      const value = trimmed.slice("tel:".length).split("?")[0].trim();
+      if (value) telLinks.add(value);
+      return;
+    }
+
+    const resolved = safeResolve(trimmed, base);
     if (!resolved) return;
+
     try {
       const linkUrl = new URL(resolved);
       if (linkUrl.hostname.endsWith(base.hostname)) {
         internalLinks.add(linkUrl.pathname.toLowerCase());
       } else {
         externalLinks.add(linkUrl.origin);
+        externalLinksFull.add(linkUrl.href);
+      }
+      if (linkText && linkText.length > 0 && linkText.length < 80) {
+        actionableLinks.push({ href: resolved, text: linkText });
       }
     } catch {
       // ignore malformed urls
     }
   });
 
-  const $temp = cheerio.load(html);
+  $("button").each((_, el) => {
+    const text = $(el).text().trim().replace(/\s+/g, " ");
+    if (text && text.length > 0 && text.length < 80) {
+      actionableLinks.push({ href: "", text });
+    }
+  });
+
   const scriptSrcs: string[] = [];
-  $temp("script[src]").each((_, el) => {
-    const src = $temp(el).attr("src");
+  $("script[src]").each((_, el) => {
+    const src = $(el).attr("src");
     if (src) scriptSrcs.push(src);
   });
 
-  const mainText = collapseWhitespace($("body").text()).slice(0, MAX_TEXT_CHARS);
+  const mainText = collapseWhitespace($forContent("body").text()).slice(
+    0,
+    MAX_TEXT_CHARS
+  );
 
   return {
     title,
@@ -84,9 +128,13 @@ export function extractPage(html: string, pageUrl: string): ExtractedPage {
     mainText,
     internalLinks: Array.from(internalLinks),
     externalLinks: Array.from(externalLinks),
+    externalLinksFull: Array.from(externalLinksFull),
     scriptSrcs,
-    rawHeadHtml: $temp("head").html() || "",
-    rawBodyHtml: $temp("body").html()?.slice(0, 200_000) || "",
+    mailtoLinks: Array.from(mailtoLinks),
+    telLinks: Array.from(telLinks),
+    actionableLinks,
+    rawHeadHtml: $("head").html() || "",
+    rawBodyHtml: $("body").html()?.slice(0, 200_000) || "",
   };
 }
 

@@ -1,6 +1,7 @@
 import type { AnalysisResult, SignalId } from "@/lib/types";
 import { FetchError, fetchPage, normalizeUrl } from "@/server/scraping/fetcher";
 import { extractPage } from "@/server/scraping/extractor";
+import { extractContacts } from "@/server/scraping/contacts";
 import { detectTechStack } from "@/server/scraping/tech-stack";
 import { detectSignals } from "@/server/scraping/signals";
 import { LlmError, analyzeWithLlm } from "@/server/llm/analyzer";
@@ -60,11 +61,15 @@ export async function runDiscovery(
     scriptSrcs: primary.scriptSrcs,
   });
 
+  const finalHost = new URL(fetched.finalUrl).hostname.replace(/^www\./, "");
+  const contacts = extractContacts({ page: primary, baseHost: finalHost });
+
   const signals = detectSignals({
     primary,
     html: fetched.html,
     headers: fetched.headers,
     techStack,
+    contacts,
     selectedSignals: options.selectedSignals,
   });
 
@@ -93,6 +98,7 @@ export async function runDiscovery(
     company,
     techStack,
     signals,
+    contacts,
     icp,
     meta: {
       title: primary.title,
