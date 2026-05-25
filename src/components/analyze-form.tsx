@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, Loader2, Search } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -20,30 +20,24 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
       }}
       className="w-full"
     >
-      <div className="relative flex w-full flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <Globe
-            aria-hidden
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            type="text"
-            inputMode="url"
-            placeholder="stripe.com ou https://www.stripe.com"
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            disabled={isLoading}
-            autoComplete="off"
-            spellCheck={false}
-            aria-label="URL du site web à analyser"
-            className="h-12 pl-9 pr-3 text-base"
-          />
-        </div>
+      <div className="flex w-full items-center gap-2 rounded-xl border border-border bg-background p-1.5 shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-4 focus-within:ring-(--brand)/15">
+        <Input
+          type="text"
+          inputMode="url"
+          placeholder="stripe.com"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          disabled={isLoading}
+          autoComplete="off"
+          spellCheck={false}
+          aria-label="URL du site web à analyser"
+          className="h-11 flex-1 border-0 bg-transparent text-base shadow-none focus-visible:outline-none focus-visible:ring-0"
+        />
         <Button
           type="submit"
-          size="lg"
+          size="default"
           disabled={isLoading || value.trim().length === 0}
-          className="h-12 px-6"
+          className="h-11 gap-2 bg-brand px-5 text-brand-foreground hover:bg-brand/90"
         >
           {isLoading ? (
             <>
@@ -52,14 +46,23 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
             </>
           ) : (
             <>
-              <Search className="size-4" />
               Analyser
+              <ArrowRight className="size-4" />
             </>
           )}
         </Button>
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Indiquez le domaine racine d’une entreprise. L’analyse complète prend en moyenne 8 à 15 secondes.
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Exemple :{" "}
+        <button
+          type="button"
+          onClick={() => onChange("stripe.com")}
+          disabled={isLoading}
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          stripe.com
+        </button>
+        {" "}— aucune inscription requise
       </p>
     </form>
   );

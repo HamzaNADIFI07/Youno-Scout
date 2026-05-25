@@ -1,19 +1,27 @@
 import Link from "next/link";
 
-export function SiteHeader() {
+type Props = {
+  variant?: "transparent" | "bordered";
+};
+
+export function SiteHeader({ variant = "transparent" }: Props) {
   return (
-    <header className="border-b border-border/60">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2">
+    <header
+      className={
+        variant === "bordered"
+          ? "border-b border-border/60"
+          : "border-b border-transparent"
+      }
+    >
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5">
+        <Link href="/" className="flex items-center gap-2.5">
           <span
             aria-hidden
-            className="inline-block h-6 w-6 rounded-md bg-foreground"
+            className="inline-block size-6 rounded-md bg-foreground"
           />
-          <span className="text-base font-semibold tracking-tight">
-            Scout
-          </span>
+          <span className="text-base font-semibold tracking-tight">Scout</span>
         </Link>
-        <span className="hidden text-xs uppercase tracking-[0.2em] text-muted-foreground sm:inline">
+        <span className="hidden text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:inline">
           Account discovery
         </span>
       </div>
