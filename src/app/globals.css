@@ -51,27 +51,27 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.52 0.21 263);
-  --primary-foreground: oklch(0.99 0 0);
-  --brand: oklch(0.52 0.21 263);
-  --brand-foreground: oklch(0.99 0 0);
-  --brand-soft: oklch(0.97 0.02 263);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: oklch(0.965 0.015 70);
+  --foreground: oklch(0.22 0.035 45);
+  --card: oklch(0.99 0.008 70);
+  --card-foreground: oklch(0.22 0.035 45);
+  --popover: oklch(0.99 0.008 70);
+  --popover-foreground: oklch(0.22 0.035 45);
+  --primary: oklch(0.65 0.155 35);
+  --primary-foreground: oklch(1 0 0);
+  --brand: oklch(0.65 0.155 35);
+  --brand-foreground: oklch(1 0 0);
+  --brand-soft: oklch(0.93 0.045 40);
+  --secondary: oklch(0.94 0.02 70);
+  --secondary-foreground: oklch(0.22 0.035 45);
+  --muted: oklch(0.93 0.018 70);
+  --muted-foreground: oklch(0.5 0.04 50);
+  --accent: oklch(0.93 0.045 40);
+  --accent-foreground: oklch(0.22 0.035 45);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.88 0.03 65);
+  --input: oklch(0.88 0.03 65);
+  --ring: oklch(0.65 0.155 35);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -136,10 +136,10 @@
 
 .hero-grid {
   background-image:
-    linear-gradient(to right, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);
-  background-size: 56px 56px;
+    linear-gradient(to right, color-mix(in oklch, var(--brand) 18%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklch, var(--brand) 18%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
   background-position: center;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
 }
