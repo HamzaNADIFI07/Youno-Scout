@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AnalyzeForm } from "@/components/analyze-form";
 import { ErrorBanner } from "@/components/error-banner";
 import { HeroBenefits } from "@/components/hero-benefits";
+import { PremiumModal } from "@/components/premium-modal";
 import { SignalsSelector } from "@/components/signals-selector";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -65,6 +66,7 @@ export default function HomePage() {
   return (
     <>
       <SiteHeader />
+      <PremiumModal />
       <main className="relative flex flex-1 flex-col overflow-hidden">
         <div
           aria-hidden
