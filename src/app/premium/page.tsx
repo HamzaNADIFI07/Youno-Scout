@@ -2,14 +2,17 @@
 
 import { ArrowLeft, ArrowRight, Globe, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BusinessStep } from "@/components/premium/business-step";
 import { PremiumStepper } from "@/components/premium/premium-stepper";
+import { RunStep } from "@/components/premium/run-step";
 import { SignalsStep } from "@/components/premium/signals-step";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Input } from "@/components/ui/input";
-import type { CustomSignal } from "@/lib/types";
+import { storeAnalysisResult } from "@/lib/result-store";
+import type { AnalysisResult, CustomSignal } from "@/lib/types";
 
 const STEPS = [
   { number: 1, label: "Site cible" },
@@ -29,12 +32,15 @@ const BTN_SHADOW = [
 type GenerateError = { error?: string };
 
 export default function PremiumPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
   const [signals, setSignals] = useState<CustomSignal[]>([]);
   const [isMutating, setIsMutating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const callGenerate = async (body: {
     description: string;
@@ -102,7 +108,42 @@ export default function PremiumPage() {
 
   const goToStep = (step: number) => {
     setGenerationError(null);
+    setAnalysisError(null);
     setCurrentStep(step);
+  };
+
+  const handleLaunch = async () => {
+    if (!url.trim() || signals.length === 0) return;
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          url: url.trim(),
+          customSignals: signals,
+        }),
+      });
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        setAnalysisError(
+          data.error ?? "L’analyse a échoué. Veuillez réessayer."
+        );
+        setIsAnalyzing(false);
+        return;
+      }
+      const result = (await response.json()) as AnalysisResult;
+      storeAnalysisResult(result);
+      router.push("/results");
+    } catch {
+      setAnalysisError(
+        "Connexion impossible au serveur. Vérifiez votre réseau."
+      );
+      setIsAnalyzing(false);
+    }
   };
 
   return (
@@ -178,9 +219,12 @@ export default function PremiumPage() {
           ) : null}
 
           {currentStep === 4 ? (
-            <RunStepPlaceholder
+            <RunStep
               url={url}
-              signalsCount={signals.length}
+              signals={signals}
+              isAnalyzing={isAnalyzing}
+              error={analysisError}
+              onLaunch={handleLaunch}
               onBack={() => goToStep(3)}
             />
           ) : null}
@@ -259,34 +303,3 @@ function UrlStep({
   );
 }
 
-function RunStepPlaceholder({
-  url,
-  signalsCount,
-  onBack,
-}: {
-  url: string;
-  signalsCount: number;
-  onBack: () => void;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
-      <h2 className="text-lg font-semibold tracking-tight">
-        Récapitulatif et lancement
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Nous allons analyser <span className="font-medium text-foreground">{url}</span>{" "}
-        avec {signalsCount} signaux personnalisés.
-      </p>
-      <p className="mt-4 text-xs text-muted-foreground">
-        Le lancement de l’analyse arrive dans la prochaine phase.
-      </p>
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-6 text-xs font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-      >
-        ← Modifier les signaux
-      </button>
-    </div>
-  );
-}

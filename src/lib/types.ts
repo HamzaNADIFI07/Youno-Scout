@@ -99,7 +99,7 @@ export const SignalIdSchema = z.enum([
 export type SignalId = z.infer<typeof SignalIdSchema>;
 
 export const SignalSchema = z.object({
-  id: SignalIdSchema,
+  id: z.string(),
   label: z.string(),
   category: z.enum(["maturity", "go-to-market", "product", "growth"]),
   detected: z.boolean(),

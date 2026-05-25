@@ -1,9 +1,10 @@
-import type { AnalysisResult, SignalId } from "@/lib/types";
+import type { AnalysisResult, CustomSignal, SignalId } from "@/lib/types";
 import { FetchError, fetchPage, normalizeUrl } from "@/server/scraping/fetcher";
 import { extractPage } from "@/server/scraping/extractor";
 import { extractContacts } from "@/server/scraping/contacts";
 import { detectTechStack } from "@/server/scraping/tech-stack";
 import { detectSignals } from "@/server/scraping/signals";
+import { detectCustomSignals } from "@/server/scraping/custom-signals";
 import { LlmError, analyzeWithLlm } from "@/server/llm/analyzer";
 import { scoreIcp } from "@/server/scoring/icp-scorer";
 
@@ -25,6 +26,7 @@ export class DiscoveryError extends Error {
 
 type DiscoveryOptions = {
   selectedSignals?: SignalId[];
+  customSignals?: CustomSignal[];
 };
 
 export async function runDiscovery(
@@ -64,14 +66,23 @@ export async function runDiscovery(
   const finalHost = new URL(fetched.finalUrl).hostname.replace(/^www\./, "");
   const contacts = extractContacts({ page: primary, baseHost: finalHost });
 
-  const signals = detectSignals({
-    primary,
-    html: fetched.html,
-    headers: fetched.headers,
-    techStack,
-    contacts,
-    selectedSignals: options.selectedSignals,
-  });
+  const hasCustomSignals =
+    options.customSignals && options.customSignals.length > 0;
+
+  const signals = hasCustomSignals
+    ? detectCustomSignals({
+        primary,
+        html: fetched.html,
+        customSignals: options.customSignals ?? [],
+      })
+    : detectSignals({
+        primary,
+        html: fetched.html,
+        headers: fetched.headers,
+        techStack,
+        contacts,
+        selectedSignals: options.selectedSignals,
+      });
 
   let company;
   try {
