@@ -24,17 +24,23 @@ export function SiteHeader({
         {showPremiumCta ? (
           <Link
             href="/premium"
-            className="group inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-background shadow-sm transition-all hover:bg-foreground/90 hover:shadow-md"
+            style={{
+              background:
+                "linear-gradient(#f5f5eb, #f5f5eb) padding-box, linear-gradient(90deg, #ce562f 0%, #e89476 50%, #ce562f 100%) border-box",
+              border: "2px solid transparent",
+              borderRadius: "12px",
+              color: "#ce562f",
+              boxShadow:
+                "0 4px 12px -4px rgba(206,86,47,0.3), 0 1px 2px rgba(0,0,0,0.04)",
+              textShadow: "0 1px 0 rgba(255,255,255,0.4)",
+            }}
+            className="group inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold transition-all hover:-translate-y-px"
           >
-            <span className="relative flex size-1.5" aria-hidden>
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#ce562f] opacity-75" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-[#ce562f]" />
-            </span>
-            <Sparkles className="size-3.5 text-[#e89476]" aria-hidden />
-            <span>Passer en Premium</span>
+            <Sparkles className="size-4" aria-hidden />
+            Passer en Premium
             <span
               aria-hidden
-              className="-ml-1 inline-block transition-transform group-hover:translate-x-0.5"
+              className="inline-block transition-transform group-hover:translate-x-0.5"
             >
               →
             </span>
