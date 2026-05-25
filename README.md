@@ -26,7 +26,7 @@ stack technique détectée, signaux GTM activés et score ICP explicable.
 | Composants | shadcn/ui | Composants accessibles copiés dans le repo (pas de dépendance UI lourde). |
 | Validation | Zod | Schémas réutilisés côté serveur (validation de requête, validation du retour LLM) et côté typage. |
 | Scraping | `cheerio` + `fetch` natif | Léger, mature, suffisant pour parser le HTML rendu côté serveur. |
-| LLM | Anthropic Claude Haiku 4.5 | Rapide, bon marché et excellent pour de l'extraction structurée via `tool_use`. |
+| LLM | Groq, modèle `llama-3.3-70b-versatile` | Inférence ultra-rapide, free tier sans carte bancaire, supporte le function calling natif pour garantir un JSON structuré. |
 | Hébergement | Vercel | Free tier suffisant, variables d'environnement faciles, cohérent avec Next.js. |
 
 ### Architecture
@@ -53,7 +53,7 @@ URL utilisateur
 [6] detectSignals    -- règles déterministes sur le contenu et la stack
    |
    v
-[7] analyzeWithLlm   -- Claude Haiku, structured output via tool_use, validation Zod
+[7] analyzeWithLlm   -- Llama 3.3 70B via Groq, structured output via function calling, validation Zod
    |
    v
 [8] scoreIcp         -- pondération explicable : modèle / signaux / tech / maturité
@@ -90,7 +90,7 @@ ce qui rend le score explicable côté UI.
 
 - Node.js 20 ou supérieur
 - npm 10 ou supérieur
-- Une clé API Anthropic (compte gratuit avec 5 USD de crédit offerts à l'inscription)
+- Une clé API Groq (compte gratuit, sans carte bancaire requise)
 
 ### Installation
 
@@ -108,16 +108,16 @@ Créez un fichier `.env.local` à partir du modèle fourni :
 cp .env.local.example .env.local
 ```
 
-Renseignez votre clé Anthropic :
+Renseignez votre clé Groq (créez-en une gratuitement sur [console.groq.com/keys](https://console.groq.com/keys)) :
 
 ```env
-ANTHROPIC_API_KEY=sk-ant-api03-...
+GROQ_API_KEY=gsk_...
 ```
 
 Optionnellement, vous pouvez surcharger le modèle utilisé :
 
 ```env
-ANTHROPIC_MODEL=claude-haiku-4-5
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 ### Lancement

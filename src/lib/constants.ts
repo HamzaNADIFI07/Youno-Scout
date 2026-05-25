@@ -5,7 +5,7 @@ export const USER_AGENT =
 
 export const FETCH_TIMEOUT_MS = 12_000;
 
-export const DEFAULT_MODEL = "claude-haiku-4-5";
+export const DEFAULT_MODEL = "llama-3.3-70b-versatile";
 
 export const MAX_HTML_BYTES = 4_000_000;
 

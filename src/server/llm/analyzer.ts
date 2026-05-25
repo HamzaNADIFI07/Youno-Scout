@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import { DEFAULT_MODEL, MAX_TEXT_CHARS_FOR_LLM } from "@/lib/constants";
 import { LlmCompanyInsightSchema, type LlmCompanyInsight } from "@/lib/types";
 
@@ -10,7 +10,8 @@ Rules:
 - Only state what is directly supported by the content.
 - If a field cannot be determined, return a sensible default and lower the confidence.
 - Keep descriptions concise and free of marketing fluff.
-- Always answer in English.`;
+- Always answer in English.
+- Always call the submit_company_brief function with your final answer.`;
 
 export class LlmError extends Error {
   constructor(message: string) {
@@ -19,7 +20,7 @@ export class LlmError extends Error {
   }
 }
 
-const INPUT_SCHEMA: Anthropic.Messages.Tool.InputSchema = {
+const INPUT_SCHEMA = {
   type: "object",
   properties: {
     name: { type: "string", description: "Official company name." },
@@ -84,42 +85,57 @@ export async function analyzeWithLlm(input: {
   description?: string;
   mainText: string;
 }): Promise<LlmCompanyInsight> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new LlmError("ANTHROPIC_API_KEY environment variable is missing.");
+    throw new LlmError("GROQ_API_KEY environment variable is missing.");
   }
 
-  const client = new Anthropic({ apiKey });
-  const model = process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
+  const client = new Groq({ apiKey });
+  const model = process.env.GROQ_MODEL ?? DEFAULT_MODEL;
 
   const userMessage = buildUserMessage(input);
 
   try {
-    const response = await client.messages.create({
+    const response = await client.chat.completions.create({
       model,
+      temperature: 0,
       max_tokens: 1500,
-      system: SYSTEM_PROMPT,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userMessage },
+      ],
       tools: [
         {
-          name: TOOL_NAME,
-          description:
-            "Submit a structured company brief based on the website content.",
-          input_schema: INPUT_SCHEMA,
+          type: "function",
+          function: {
+            name: TOOL_NAME,
+            description:
+              "Submit a structured company brief based on the website content.",
+            parameters: INPUT_SCHEMA,
+          },
         },
       ],
-      tool_choice: { type: "tool", name: TOOL_NAME },
-      messages: [{ role: "user", content: userMessage }],
+      tool_choice: {
+        type: "function",
+        function: { name: TOOL_NAME },
+      },
     });
 
-    const toolUseBlock = response.content.find(
-      (block) => block.type === "tool_use"
-    );
+    const message = response.choices[0]?.message;
+    const toolCall = message?.tool_calls?.[0];
 
-    if (!toolUseBlock || toolUseBlock.type !== "tool_use") {
+    if (!toolCall || toolCall.type !== "function") {
       throw new LlmError("LLM did not return a structured brief.");
     }
 
-    const parsed = LlmCompanyInsightSchema.safeParse(toolUseBlock.input);
+    let rawArgs: unknown;
+    try {
+      rawArgs = JSON.parse(toolCall.function.arguments);
+    } catch {
+      throw new LlmError("LLM returned malformed JSON.");
+    }
+
+    const parsed = LlmCompanyInsightSchema.safeParse(rawArgs);
     if (!parsed.success) {
       throw new LlmError(
         `LLM response failed validation: ${parsed.error.issues
@@ -131,8 +147,8 @@ export async function analyzeWithLlm(input: {
     return parsed.data;
   } catch (error) {
     if (error instanceof LlmError) throw error;
-    if (error instanceof Anthropic.APIError) {
-      throw new LlmError(`Anthropic API error: ${error.message}`);
+    if (error instanceof Groq.APIError) {
+      throw new LlmError(`Groq API error: ${error.message}`);
     }
     throw new LlmError(
       error instanceof Error ? error.message : "Unknown LLM error."
