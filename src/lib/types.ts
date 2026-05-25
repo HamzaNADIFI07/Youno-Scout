@@ -86,10 +86,9 @@ export const SignalIdSchema = z.enum([
   "contact-email",
   "contact-phone",
   "contact-form",
-  "crm-hubspot",
-  "crm-salesforce",
-  "tracking-ip-based",
-  "payment-stripe",
+  "crm-used",
+  "tracking-stack",
+  "payment-solution",
   "support-chat",
   "model-plg",
   "model-enterprise",
@@ -108,6 +107,7 @@ export const SignalSchema = z.object({
   detected: z.boolean(),
   weight: z.number(),
   selected: z.boolean(),
+  value: z.string().optional(),
   evidence: z.string().optional(),
 });
 export type Signal = z.infer<typeof SignalSchema>;

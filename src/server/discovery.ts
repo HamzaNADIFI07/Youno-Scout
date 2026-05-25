@@ -61,6 +61,7 @@ export async function runDiscovery(
     html: fetched.html,
     headers: fetched.headers,
     scriptSrcs: primary.scriptSrcs,
+    externalLinks: primary.externalLinksFull,
   });
 
   const finalHost = new URL(fetched.finalUrl).hostname.replace(/^www\./, "");

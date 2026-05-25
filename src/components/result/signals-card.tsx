@@ -26,7 +26,7 @@ export function SignalsCard({ signals }: Props) {
             Signaux GTM
           </CardTitle>
           <span className="text-xs tabular-nums text-muted-foreground">
-            {detectedCount} / {selectedSignals.length} retenus
+            {detectedCount} / {selectedSignals.length} renseignés
             {excludedCount > 0 ? ` · ${excludedCount} exclus` : ""}
           </span>
         </div>
@@ -60,17 +60,31 @@ export function SignalsCard({ signals }: Props) {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className={`text-sm font-medium ${
-                      inactive
-                        ? "text-muted-foreground/70 line-through decoration-muted-foreground/40"
-                        : signal.detected
-                          ? ""
-                          : "text-muted-foreground"
-                    }`}
-                  >
-                    {signal.label}
-                  </p>
+                  <div className="flex flex-wrap items-baseline gap-x-2">
+                    <p
+                      className={`text-sm font-medium ${
+                        inactive
+                          ? "text-muted-foreground/70 line-through decoration-muted-foreground/40"
+                          : "text-foreground"
+                      }`}
+                    >
+                      {signal.label}
+                    </p>
+                    {!inactive ? (
+                      <span className="text-sm text-foreground/85">
+                        :{" "}
+                        <span
+                          className={
+                            signal.detected
+                              ? "font-semibold text-[#ce562f]"
+                              : "italic text-muted-foreground"
+                          }
+                        >
+                          {signal.value ?? "Non renseigné"}
+                        </span>
+                      </span>
+                    ) : null}
+                  </div>
                   {inactive ? (
                     <p className="mt-0.5 text-xs text-muted-foreground/70">
                       Exclu de l’analyse

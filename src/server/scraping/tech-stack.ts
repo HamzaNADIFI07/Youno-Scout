@@ -11,8 +11,13 @@ export function detectTechStack(input: {
   html: string;
   headers: Record<string, string>;
   scriptSrcs: string[];
+  externalLinks?: string[];
 }): TechStack {
-  const haystack = [input.html, ...input.scriptSrcs].join("\n");
+  const haystack = [
+    input.html,
+    ...input.scriptSrcs,
+    ...(input.externalLinks ?? []),
+  ].join("\n");
   const detections: Detection[] = [];
 
   for (const tech of TECH_PATTERNS) {
