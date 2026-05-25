@@ -12,16 +12,14 @@ type Props = {
 };
 
 const BASE_SHADOW = [
-  "inset 0 1px 0 rgba(255,255,255,0.45)",
-  "0 8px 18px -4px rgba(206,86,47,0.45)",
-  "0 1px 2px rgba(0,0,0,0.06)",
+  "inset 0 1.5px 0 rgba(255,255,255,0.55)",
+  "inset 0 -1.5px 0 rgba(154,60,30,0.4)",
+  "0 4px 8px -2px rgba(206,86,47,0.35)",
+  "0 12px 24px -6px rgba(206,86,47,0.5)",
+  "0 1px 2px rgba(0,0,0,0.08)",
 ].join(", ");
 
-const HOVER_SHADOW = [
-  "inset 0 1px 0 rgba(255,255,255,0.55)",
-  "0 12px 24px -4px rgba(206,86,47,0.55)",
-  "0 2px 4px rgba(0,0,0,0.08)",
-].join(", ");
+
 
 export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
   const [isHovering, setIsHovering] = useState(false);
@@ -38,7 +36,7 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
     fontWeight: 500,
     textShadow: "0 1px 0 rgba(0,0,0,0.2)",
     boxShadow:
-      isHovering && !isDisabled && !isPressing ? HOVER_SHADOW : BASE_SHADOW,
+      BASE_SHADOW,
     transform:
       isHovering && !isDisabled && !isPressing
         ? "translateY(-1px)"
@@ -68,7 +66,7 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
         <Input
           type="text"
           inputMode="url"
-          placeholder="stripe.com"
+          placeholder="youno.fr"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           disabled={isLoading}
@@ -107,13 +105,13 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
         Exemple :{" "}
         <button
           type="button"
-          onClick={() => onChange("stripe.com")}
+          onClick={() => onChange("youno.fr")}
           disabled={isLoading}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
-          stripe.com
+          youno.fr
         </button>
-        {" "}— aucune inscription requise
+        {" "}
       </p>
     </form>
   );

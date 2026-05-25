@@ -63,9 +63,6 @@ export default function HomePage() {
         />
 
         <section className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-20 sm:py-28">
-          <span className="inline-flex items-center rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground backdrop-blur-sm">
-            Account discovery
-          </span>
 
           <h1 className="text-gradient-hero mt-6 max-w-3xl text-balance text-center text-4xl font-semibold tracking-tight sm:text-5xl md:text-[3.5rem] md:leading-[1.05]">
             Du site web au compte qualifié,
