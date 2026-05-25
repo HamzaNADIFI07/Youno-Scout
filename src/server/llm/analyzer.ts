@@ -10,7 +10,8 @@ Rules:
 - Only state what is directly supported by the content.
 - If a field cannot be determined, return a sensible default and lower the confidence.
 - Keep descriptions concise and free of marketing fluff.
-- Always answer in English.
+- Toujours répondre en français, peu importe la langue du site analysé. Traduire si nécessaire.
+- L'industrie doit être un terme français en minuscules avec tirets (ex. "fintech", "outils-marketing", "logiciel-rh", "e-commerce").
 - Always call the submit_company_brief function with your final answer.`;
 
 export class LlmError extends Error {
@@ -23,20 +24,21 @@ export class LlmError extends Error {
 const INPUT_SCHEMA = {
   type: "object",
   properties: {
-    name: { type: "string", description: "Official company name." },
+    name: { type: "string", description: "Nom officiel de l'entreprise." },
     shortDescription: {
       type: "string",
-      description: "One sentence describing what the company does.",
+      description:
+        "Une phrase en français décrivant ce que fait l'entreprise.",
     },
     longDescription: {
       type: "string",
       description:
-        "Short paragraph (3 to 5 sentences) explaining the value proposition.",
+        "Paragraphe court en français (3 à 5 phrases) expliquant la proposition de valeur.",
     },
     industry: {
       type: "string",
       description:
-        "Industry vertical in kebab-case (eg. fintech, devtools, hr-tech).",
+        "Secteur d'activité en français, kebab-case minuscule (ex : fintech, outils-marketing, logiciel-rh, e-commerce).",
     },
     businessModel: {
       type: "string",
@@ -48,21 +50,25 @@ const INPUT_SCHEMA = {
     },
     targetAudience: {
       type: "string",
-      description: "Who they sell to, in one short sentence.",
+      description:
+        "À qui ils vendent, en une phrase courte en français.",
     },
     valueProposition: {
       type: "string",
-      description: "Core promise of the company in one sentence.",
+      description:
+        "Promesse principale de l'entreprise en une phrase en français.",
     },
     pricingPublicly: {
       type: "boolean",
-      description: "Whether a public pricing page or pricing info is visible.",
+      description:
+        "True si une page de tarifs publique ou des prix visibles existent sur le site.",
     },
     confidence: {
       type: "number",
       minimum: 0,
       maximum: 1,
-      description: "Confidence in the extraction quality.",
+      description:
+        "Confiance dans la qualité d'extraction, de 0 (très faible) à 1 (très élevée).",
     },
   },
   required: [
