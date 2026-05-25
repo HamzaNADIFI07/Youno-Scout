@@ -178,6 +178,44 @@ export const AnalysisResultSchema = z.object({
 });
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
 
+export const CustomSignalCategorySchema = z.enum([
+  "joignabilite",
+  "maturite",
+  "croissance",
+  "produit",
+  "fit",
+]);
+export type CustomSignalCategory = z.infer<typeof CustomSignalCategorySchema>;
+
+export const CustomSignalDetectionSchema = z.object({
+  keywords: z.array(z.string()).max(15),
+  urlPatterns: z.array(z.string()).max(10),
+});
+export type CustomSignalDetection = z.infer<typeof CustomSignalDetectionSchema>;
+
+export const CustomSignalSchema = z.object({
+  id: z.string(),
+  label: z.string().min(3).max(120),
+  category: CustomSignalCategorySchema,
+  weight: z.number().int().min(1).max(10),
+  detection: CustomSignalDetectionSchema,
+  rationale: z.string().min(5).max(400),
+});
+export type CustomSignal = z.infer<typeof CustomSignalSchema>;
+
+export const GenerateSignalsRequestSchema = z.object({
+  description: z.string().min(20).max(5000),
+  targetUrl: z.string().max(2048).optional(),
+  currentSignals: z.array(CustomSignalSchema).optional(),
+  instruction: z.string().max(2000).optional(),
+});
+export type GenerateSignalsRequest = z.infer<typeof GenerateSignalsRequestSchema>;
+
+export const GenerateSignalsResponseSchema = z.object({
+  signals: z.array(CustomSignalSchema),
+});
+export type GenerateSignalsResponse = z.infer<typeof GenerateSignalsResponseSchema>;
+
 export const AnalyzeRequestSchema = z.object({
   url: z
     .string()
@@ -185,6 +223,7 @@ export const AnalyzeRequestSchema = z.object({
     .max(2048)
     .transform((value) => value.trim()),
   selectedSignals: z.array(SignalIdSchema).optional(),
+  customSignals: z.array(CustomSignalSchema).optional(),
 });
 export type AnalyzeRequest = z.infer<typeof AnalyzeRequestSchema>;
 
