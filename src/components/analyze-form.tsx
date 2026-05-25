@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowRight, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type Props = {
@@ -33,24 +32,23 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
           aria-label="URL du site web à analyser"
           className="h-11 flex-1 border-0 bg-transparent text-base shadow-none focus-visible:outline-none focus-visible:ring-0"
         />
-        <Button
+        <button
           type="submit"
-          size="default"
           disabled={isLoading || value.trim().length === 0}
-          className="btn-scout h-11 gap-2 px-7 text-sm"
+          className="btn-scout inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap px-7 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#d05c35]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           {isLoading ? (
             <>
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" aria-hidden />
               Analyse en cours
             </>
           ) : (
             <>
               Analyser
-              <ArrowRight className="size-4" />
+              <ArrowRight className="size-4" aria-hidden />
             </>
           )}
-        </Button>
+        </button>
       </div>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         Exemple :{" "}
