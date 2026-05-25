@@ -35,7 +35,7 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
         <button
           type="submit"
           disabled={isLoading || value.trim().length === 0}
-          className="btn-scout inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap px-7 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#d05c35]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="btn-scout inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-7 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#d05c35]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           {isLoading ? (
             <>
