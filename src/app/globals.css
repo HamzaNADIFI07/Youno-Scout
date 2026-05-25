@@ -145,23 +145,23 @@
 }
 
 .btn-scout {
-  background-image: linear-gradient(135deg, #d05c35 0%, #e89476 100%);
+  background-image: linear-gradient(90deg, #090505 0%, #745452 50%, #090505 100%);
   color: #ffffff;
   transition: filter 200ms ease, box-shadow 200ms ease, transform 100ms ease;
 }
 
 .btn-scout:hover:not(:disabled) {
-  filter: brightness(0.95);
-  box-shadow: 0 10px 24px -12px rgb(208 92 53 / 0.45);
+  filter: brightness(1.15);
+  box-shadow: 0 10px 24px -12px rgb(9 5 5 / 0.5);
 }
 
 .btn-scout:disabled {
-  opacity: 0.65;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
 .text-gradient-hero {
-  background-image: linear-gradient(135deg, #090505 0%, #745452 100%);
+  background-image: linear-gradient(90deg, #090505 0%, #745452 50%, #090505 100%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
