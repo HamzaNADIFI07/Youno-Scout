@@ -1,0 +1,34 @@
+import { Clock } from "lucide-react";
+import { CompanyHeader } from "@/components/result/company-header";
+import { DescriptionCard } from "@/components/result/description-card";
+import { ScoreCard } from "@/components/result/score-card";
+import { SignalsCard } from "@/components/result/signals-card";
+import { TechStackCard } from "@/components/result/tech-stack-card";
+import { formatDuration } from "@/lib/format";
+import type { AnalysisResult } from "@/lib/types";
+
+type Props = {
+  result: AnalysisResult;
+};
+
+export function ResultView({ result }: Props) {
+  return (
+    <div className="space-y-6">
+      <CompanyHeader result={result} />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ScoreCard icp={result.icp} />
+        <SignalsCard signals={result.signals} />
+      </div>
+
+      <DescriptionCard result={result} />
+
+      <TechStackCard techStack={result.techStack} />
+
+      <div className="flex items-center justify-end gap-2 pt-2 text-xs text-muted-foreground">
+        <Clock className="size-3" aria-hidden />
+        <span>Analyse complétée en {formatDuration(result.durationMs)}</span>
+      </div>
+    </div>
+  );
+}
