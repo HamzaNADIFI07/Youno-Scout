@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     const result = await runDiscovery(parsed.data.url, {
       selectedSignals: parsed.data.selectedSignals,
       customSignals: parsed.data.customSignals,
+      enabledApis: parsed.data.enabledApis,
     });
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

@@ -190,6 +190,56 @@ export const PersonSchema = z.object({
 });
 export type Person = z.infer<typeof PersonSchema>;
 
+export const HunterContactSchema = z.object({
+  email: z.string(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  position: z.string().optional(),
+  confidence: z.number().optional(),
+  type: z.string().optional(),
+});
+export type HunterContact = z.infer<typeof HunterContactSchema>;
+
+export const HunterEnrichmentSchema = z.object({
+  domain: z.string().optional(),
+  organization: z.string().optional(),
+  emails: z.array(HunterContactSchema),
+  pattern: z.string().optional(),
+  totalEmailsFound: z.number().optional(),
+});
+export type HunterEnrichment = z.infer<typeof HunterEnrichmentSchema>;
+
+export const CompanyEnrichmentSchema = z.object({
+  name: z.string().optional(),
+  legalName: z.string().optional(),
+  domain: z.string().optional(),
+  description: z.string().optional(),
+  industry: z.string().optional(),
+  employees: z.string().optional(),
+  founded: z.string().optional(),
+  location: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  linkedinUrl: z.string().optional(),
+  twitterUrl: z.string().optional(),
+});
+export type CompanyEnrichment = z.infer<typeof CompanyEnrichmentSchema>;
+
+export const EnrichmentDataSchema = z.object({
+  logoUrl: z.string().optional(),
+  hunter: HunterEnrichmentSchema.optional(),
+  companyEnrich: CompanyEnrichmentSchema.optional(),
+  errors: z
+    .array(
+      z.object({
+        api: z.enum(["clearbit-logo", "hunter", "company-enrich"]),
+        message: z.string(),
+      })
+    )
+    .optional(),
+});
+export type EnrichmentData = z.infer<typeof EnrichmentDataSchema>;
+
 export const AnalysisResultSchema = z.object({
   url: z.string().url(),
   finalUrl: z.string().url(),
@@ -202,6 +252,7 @@ export const AnalysisResultSchema = z.object({
   legal: LegalInfoSchema,
   people: z.array(PersonSchema),
   icp: IcpScoreSchema,
+  enrichment: EnrichmentDataSchema.optional(),
   meta: z.object({
     title: z.string().optional(),
     description: z.string().optional(),
@@ -250,6 +301,13 @@ export const GenerateSignalsResponseSchema = z.object({
 });
 export type GenerateSignalsResponse = z.infer<typeof GenerateSignalsResponseSchema>;
 
+export const EnabledApisSchema = z.object({
+  clearbitLogo: z.boolean().optional(),
+  hunter: z.boolean().optional(),
+  companyEnrich: z.boolean().optional(),
+});
+export type EnabledApis = z.infer<typeof EnabledApisSchema>;
+
 export const AnalyzeRequestSchema = z.object({
   url: z
     .string()
@@ -258,6 +316,7 @@ export const AnalyzeRequestSchema = z.object({
     .transform((value) => value.trim()),
   selectedSignals: z.array(SignalIdSchema).optional(),
   customSignals: z.array(CustomSignalSchema).optional(),
+  enabledApis: EnabledApisSchema.optional(),
 });
 export type AnalyzeRequest = z.infer<typeof AnalyzeRequestSchema>;
 

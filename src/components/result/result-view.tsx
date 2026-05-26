@@ -2,6 +2,7 @@ import { Clock } from "lucide-react";
 import { CompanyHeader } from "@/components/result/company-header";
 import { ContactsCard } from "@/components/result/contacts-card";
 import { DescriptionCard } from "@/components/result/description-card";
+import { EnrichmentCard } from "@/components/result/enrichment-card";
 import { LegalCard } from "@/components/result/legal-card";
 import { PeopleCard } from "@/components/result/people-card";
 import { ScoreCard } from "@/components/result/score-card";
@@ -20,6 +21,10 @@ export function ResultView({ result }: Props) {
       <CompanyHeader result={result} />
 
       <DescriptionCard result={result} />
+
+      {result.enrichment ? (
+        <EnrichmentCard enrichment={result.enrichment} />
+      ) : null}
 
       <ContactsCard contacts={result.contacts} />
 

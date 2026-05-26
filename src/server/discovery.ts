@@ -1,6 +1,9 @@
 import type {
   AnalysisResult,
+  Contacts,
   CustomSignal,
+  EnabledApis,
+  EnrichmentData,
   LegalInfo,
   Person,
   SignalId,
@@ -16,6 +19,7 @@ import {
   findLegalLinksFromActionable,
   findLegalPagePaths,
 } from "@/server/scraping/legal-extractor";
+import { runEnrichments } from "@/server/enrichment";
 import { LlmError, analyzeWithLlm } from "@/server/llm/analyzer";
 import { scoreIcp } from "@/server/scoring/icp-scorer";
 
@@ -38,6 +42,7 @@ export class DiscoveryError extends Error {
 type DiscoveryOptions = {
   selectedSignals?: SignalId[];
   customSignals?: CustomSignal[];
+  enabledApis?: EnabledApis;
 };
 
 export async function runDiscovery(
@@ -117,21 +122,51 @@ export async function runDiscovery(
     actionableLinks: primary.actionableLinks,
   });
 
+  const enrichment = await runEnrichments({
+    domain: finalHost,
+    enabledApis: options.enabledApis,
+  });
+
+  const finalContacts = mergeContactsWithEnrichment(contacts, enrichment);
+  const finalLegal = mergeLegalWithEnrichment(legal, enrichment);
+
   const people: Person[] = (company.people ?? []).map((p) => ({
     fullName: p.fullName,
     role: p.role,
     source: "homepage",
   }));
-  if (legal.publicationDirector) {
+  if (finalLegal.publicationDirector) {
     const alreadyListed = people.some(
-      (p) => p.fullName.toLowerCase() === legal.publicationDirector!.toLowerCase()
+      (p) =>
+        p.fullName.toLowerCase() ===
+        finalLegal.publicationDirector!.toLowerCase()
     );
     if (!alreadyListed) {
       people.push({
-        fullName: legal.publicationDirector,
+        fullName: finalLegal.publicationDirector,
         role: "Directeur de la publication",
         source: "mentions-legales",
       });
+    }
+  }
+  if (enrichment?.hunter?.emails) {
+    for (const contact of enrichment.hunter.emails) {
+      if (!contact.firstName && !contact.lastName) continue;
+      const fullName = [contact.firstName, contact.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      if (!fullName) continue;
+      const alreadyListed = people.some(
+        (p) => p.fullName.toLowerCase() === fullName.toLowerCase()
+      );
+      if (!alreadyListed) {
+        people.push({
+          fullName,
+          role: contact.position,
+          source: "hunter",
+        });
+      }
     }
   }
 
@@ -145,17 +180,96 @@ export async function runDiscovery(
     company,
     techStack,
     signals,
-    contacts,
-    legal,
+    contacts: finalContacts,
+    legal: finalLegal,
     people,
     icp,
+    enrichment,
     meta: {
       title: primary.title,
       description: primary.description ?? primary.ogDescription,
-      favicon: primary.favicon,
+      favicon: enrichment?.logoUrl ?? primary.favicon,
       ogImage: primary.ogImage,
       language: primary.language,
     },
+  };
+}
+
+function mergeContactsWithEnrichment(
+  contacts: Contacts,
+  enrichment: EnrichmentData | undefined
+): Contacts {
+  if (!enrichment) return contacts;
+  const merged: Contacts = {
+    emails: [...contacts.emails],
+    phones: contacts.phones,
+    socials: [...contacts.socials],
+    hasContactForm: contacts.hasContactForm,
+  };
+  if (enrichment.hunter?.emails && enrichment.hunter.emails.length > 0) {
+    const apiEmails = enrichment.hunter.emails
+      .map((c) => c.email)
+      .filter(Boolean);
+    const dedup = new Set<string>();
+    const reordered: string[] = [];
+    for (const email of apiEmails) {
+      const key = email.toLowerCase();
+      if (!dedup.has(key)) {
+        dedup.add(key);
+        reordered.push(email);
+      }
+    }
+    for (const email of contacts.emails) {
+      const key = email.toLowerCase();
+      if (!dedup.has(key)) {
+        dedup.add(key);
+        reordered.push(email);
+      }
+    }
+    merged.emails = reordered;
+  }
+  if (enrichment.companyEnrich?.linkedinUrl) {
+    if (!merged.socials.some((s) => s.platform === "linkedin")) {
+      merged.socials = [
+        ...merged.socials,
+        {
+          platform: "linkedin",
+          url: enrichment.companyEnrich.linkedinUrl,
+        },
+      ];
+    }
+  }
+  if (enrichment.companyEnrich?.twitterUrl) {
+    if (!merged.socials.some((s) => s.platform === "twitter")) {
+      merged.socials = [
+        ...merged.socials,
+        {
+          platform: "twitter",
+          url: enrichment.companyEnrich.twitterUrl,
+        },
+      ];
+    }
+  }
+  return merged;
+}
+
+function mergeLegalWithEnrichment(
+  legal: LegalInfo,
+  enrichment: EnrichmentData | undefined
+): LegalInfo {
+  if (!enrichment?.companyEnrich) return legal;
+  const enrich = enrichment.companyEnrich;
+  return {
+    legalName: enrich.legalName ?? legal.legalName,
+    legalForm: legal.legalForm,
+    registrationNumber: legal.registrationNumber,
+    vatNumber: legal.vatNumber,
+    shareCapital: legal.shareCapital,
+    rcs: legal.rcs,
+    headquartersAddress: enrich.location ?? legal.headquartersAddress,
+    publicationDirector: legal.publicationDirector,
+    hostingProvider: legal.hostingProvider,
+    legalPageUrl: legal.legalPageUrl,
   };
 }
 
