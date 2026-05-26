@@ -1,12 +1,15 @@
 "use client";
 
 import { ArrowRight, Globe, Loader2, Sparkles, Target } from "lucide-react";
+import { ApiSelector } from "@/components/api-selector";
 import { Badge } from "@/components/ui/badge";
-import type { CustomSignal } from "@/lib/types";
+import type { CustomSignal, EnabledApis } from "@/lib/types";
 
 type Props = {
   url: string;
   signals: CustomSignal[];
+  enabledApis: EnabledApis;
+  onApisChange: (next: EnabledApis) => void;
   isAnalyzing: boolean;
   error: string | null;
   onLaunch: () => void;
@@ -24,6 +27,8 @@ const BTN_SHADOW = [
 export function RunStep({
   url,
   signals,
+  enabledApis,
+  onApisChange,
   isAnalyzing,
   error,
   onLaunch,
@@ -82,6 +87,14 @@ export function RunStep({
             </div>
           </div>
         ) : null}
+
+        <div className="mt-6 border-t border-border pt-6">
+          <ApiSelector
+            enabled={enabledApis}
+            onChange={onApisChange}
+            disabled={isAnalyzing}
+          />
+        </div>
 
         {error ? (
           <div className="mt-6 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">

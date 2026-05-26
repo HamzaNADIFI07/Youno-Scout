@@ -12,7 +12,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Input } from "@/components/ui/input";
 import { storeAnalysisResult } from "@/lib/result-store";
-import type { AnalysisResult, CustomSignal } from "@/lib/types";
+import type { AnalysisResult, CustomSignal, EnabledApis } from "@/lib/types";
 
 const STEPS = [
   { number: 1, label: "Site cible" },
@@ -31,12 +31,20 @@ const BTN_SHADOW = [
 
 type GenerateError = { error?: string };
 
+const DEFAULT_ENABLED_APIS: EnabledApis = {
+  clearbitLogo: true,
+  hunter: false,
+  companyEnrich: false,
+};
+
 export default function PremiumPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
   const [signals, setSignals] = useState<CustomSignal[]>([]);
+  const [enabledApis, setEnabledApis] =
+    useState<EnabledApis>(DEFAULT_ENABLED_APIS);
   const [isMutating, setIsMutating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -123,6 +131,7 @@ export default function PremiumPage() {
         body: JSON.stringify({
           url: url.trim(),
           customSignals: signals,
+          enabledApis,
         }),
       });
       if (!response.ok) {
@@ -222,6 +231,8 @@ export default function PremiumPage() {
             <RunStep
               url={url}
               signals={signals}
+              enabledApis={enabledApis}
+              onApisChange={setEnabledApis}
               isAnalyzing={isAnalyzing}
               error={analysisError}
               onLaunch={handleLaunch}
