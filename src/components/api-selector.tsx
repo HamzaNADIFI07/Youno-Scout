@@ -1,12 +1,12 @@
 "use client";
 
 import { Database, Image as ImageIcon, MailSearch } from "lucide-react";
-import type { ApiKey, ApiQuota } from "@/lib/api-quota";
 import type { EnabledApis } from "@/lib/types";
+
+type ApiKey = keyof EnabledApis;
 
 type Props = {
   enabled: EnabledApis;
-  quotas: Record<ApiKey, ApiQuota>;
   onChange: (next: EnabledApis) => void;
   disabled?: boolean;
 };
@@ -39,7 +39,7 @@ const OPTIONS: Option[] = [
   },
 ];
 
-export function ApiSelector({ enabled, quotas, onChange, disabled }: Props) {
+export function ApiSelector({ enabled, onChange, disabled }: Props) {
   const toggle = (key: ApiKey) => {
     onChange({ ...enabled, [key]: !enabled[key] });
   };
@@ -56,16 +56,13 @@ export function ApiSelector({ enabled, quotas, onChange, disabled }: Props) {
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {OPTIONS.map(({ key, name, description, Icon }) => {
-          const quota = quotas[key];
           const isChecked = Boolean(enabled[key]);
-          const isExhausted =
-            quota.limit > 0 && quota.used >= quota.limit;
           return (
             <button
               key={key}
               type="button"
               onClick={() => toggle(key)}
-              disabled={disabled || isExhausted}
+              disabled={disabled}
               aria-pressed={isChecked}
               className={`group relative flex flex-col gap-2 rounded-xl border p-3 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
                 isChecked
@@ -85,16 +82,6 @@ export function ApiSelector({ enabled, quotas, onChange, disabled }: Props) {
                   {description}
                 </p>
               </div>
-              <p className="text-[11px] font-medium tabular-nums text-muted-foreground">
-                {quota.limit === 0
-                  ? "Quota illimité"
-                  : `${quota.used} / ${quota.limit} ${quota.periodLabel}`}
-                {isExhausted ? (
-                  <span className="ml-1 font-semibold text-destructive">
-                    · épuisé
-                  </span>
-                ) : null}
-              </p>
             </button>
           );
         })}
