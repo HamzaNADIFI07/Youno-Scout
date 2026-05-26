@@ -1,6 +1,6 @@
-import Groq from "groq-sdk";
-import { DEFAULT_MODEL, MAX_TEXT_CHARS_FOR_LLM } from "@/lib/constants";
+import { MAX_TEXT_CHARS_FOR_LLM } from "@/lib/constants";
 import { LlmCompanyInsightSchema, type LlmCompanyInsight } from "@/lib/types";
+import { LlmProviderError, callLlm } from "@/server/llm/providers";
 
 const TOOL_NAME = "submit_company_brief";
 
@@ -16,8 +16,15 @@ Rules:
 - Always call the submit_company_brief function with your final answer.`;
 
 export class LlmError extends Error {
-  constructor(message: string) {
+  code:
+    | "quota-exceeded"
+    | "no-providers"
+    | "invalid-output"
+    | "llm-failed";
+
+  constructor(message: string, code: LlmError["code"] = "llm-failed") {
     super(message);
+    this.code = code;
     this.name = "LlmError";
   }
 }
@@ -51,8 +58,7 @@ const INPUT_SCHEMA = {
     },
     targetAudience: {
       type: "string",
-      description:
-        "À qui ils vendent, en une phrase courte en français.",
+      description: "À qui ils vendent, en une phrase courte en français.",
     },
     valueProposition: {
       type: "string",
@@ -115,21 +121,11 @@ export async function analyzeWithLlm(input: {
   description?: string;
   mainText: string;
 }): Promise<LlmCompanyInsight> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    throw new LlmError("GROQ_API_KEY environment variable is missing.");
-  }
-
-  const client = new Groq({ apiKey });
-  const model = process.env.GROQ_MODEL ?? DEFAULT_MODEL;
-
   const userMessage = buildUserMessage(input);
 
+  let response;
   try {
-    const response = await client.chat.completions.create({
-      model,
-      temperature: 0,
-      max_tokens: 1500,
+    response = await callLlm("analyze", {
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userMessage },
@@ -145,45 +141,41 @@ export async function analyzeWithLlm(input: {
           },
         },
       ],
-      tool_choice: {
-        type: "function",
-        function: { name: TOOL_NAME },
-      },
+      toolChoice: { type: "function", function: { name: TOOL_NAME } },
+      temperature: 0,
+      maxTokens: 1500,
     });
-
-    const message = response.choices[0]?.message;
-    const toolCall = message?.tool_calls?.[0];
-
-    if (!toolCall || toolCall.type !== "function") {
-      throw new LlmError("LLM did not return a structured brief.");
-    }
-
-    let rawArgs: unknown;
-    try {
-      rawArgs = JSON.parse(toolCall.function.arguments);
-    } catch {
-      throw new LlmError("LLM returned malformed JSON.");
-    }
-
-    const parsed = LlmCompanyInsightSchema.safeParse(rawArgs);
-    if (!parsed.success) {
-      throw new LlmError(
-        `LLM response failed validation: ${parsed.error.issues
-          .map((i) => i.message)
-          .join("; ")}`
-      );
-    }
-
-    return parsed.data;
   } catch (error) {
-    if (error instanceof LlmError) throw error;
-    if (error instanceof Groq.APIError) {
-      throw new LlmError(`Groq API error: ${error.message}`);
+    if (error instanceof LlmProviderError) {
+      if (error.code === "no-providers") {
+        throw new LlmError("no-providers", "no-providers");
+      }
+      if (error.code === "quota") {
+        throw new LlmError("quota-exceeded", "quota-exceeded");
+      }
+      throw new LlmError("llm-failed", "llm-failed");
     }
-    throw new LlmError(
-      error instanceof Error ? error.message : "Unknown LLM error."
-    );
+    throw new LlmError("llm-failed", "llm-failed");
   }
+
+  const toolCall = response.toolCalls[0];
+  if (!toolCall) {
+    throw new LlmError("invalid-output", "invalid-output");
+  }
+
+  let rawArgs: unknown;
+  try {
+    rawArgs = JSON.parse(toolCall.arguments);
+  } catch {
+    throw new LlmError("invalid-output", "invalid-output");
+  }
+
+  const parsed = LlmCompanyInsightSchema.safeParse(rawArgs);
+  if (!parsed.success) {
+    throw new LlmError("invalid-output", "invalid-output");
+  }
+
+  return parsed.data;
 }
 
 function buildUserMessage(input: {
