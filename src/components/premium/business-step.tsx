@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 
 type Props = {
@@ -29,8 +30,21 @@ export function BusinessStep({
   onGenerate,
   onBack,
 }: Props) {
-  const remaining = MIN_LENGTH - description.trim().length;
-  const disabled = isGenerating || description.trim().length < MIN_LENGTH;
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const trimmedLength = description.trim().length;
+  const isTooShort = trimmedLength < MIN_LENGTH;
+  const disabled = isGenerating;
+  const lengthError =
+    submitAttempted && isTooShort
+      ? `Décrivez votre activité avec au moins ${MIN_LENGTH} caractères (vous en avez ${trimmedLength}).`
+      : null;
+
+  const handleDescriptionChange = (value: string) => {
+    onDescriptionChange(value);
+    if (submitAttempted && value.trim().length >= MIN_LENGTH) {
+      setSubmitAttempted(false);
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
@@ -45,13 +59,19 @@ export function BusinessStep({
         className="mt-6 space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!disabled) onGenerate();
+          if (isGenerating) return;
+          if (isTooShort) {
+            setSubmitAttempted(true);
+            return;
+          }
+          setSubmitAttempted(false);
+          onGenerate();
         }}
       >
         <div className="rounded-xl border border-border bg-background shadow-sm transition-shadow focus-within:shadow-md">
           <textarea
             value={description}
-            onChange={(event) => onDescriptionChange(event.target.value)}
+            onChange={(event) => handleDescriptionChange(event.target.value)}
             disabled={isGenerating}
             rows={7}
             placeholder="Exemple structuré :&#10;&#10;Notre offre :&#10;Nous vendons Cargo, une plateforme d'orchestration GTM…&#10;&#10;Notre ICP :&#10;Scale-ups SaaS B2B, 50 à 300 employés, ont levé Série A/B, utilisent HubSpot ou Salesforce…&#10;&#10;Les signaux d'achat (ce que je veux DÉTECTER chez le prospect) :&#10;— Recrute un Head of RevOps ou GTM Engineer&#10;— Vient de lever des fonds (Series A/B)&#10;— Affiche un partenariat HubSpot ou Salesforce&#10;— Publie sur le RevOps / GTM Engineering&#10;&#10;Anti-signaux (qui n'est PAS la cible) :&#10;— Boîtes B2C, agences marketing classiques, < 1M€ d'ARR"
@@ -59,20 +79,15 @@ export function BusinessStep({
           />
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          <span>
-            {remaining > 0
-              ? `${remaining} caractère${remaining > 1 ? "s" : ""} restant${remaining > 1 ? "s" : ""}`
-              : `${description.trim().length} caractères`}
-          </span>
+        <div className="flex items-center justify-end text-[11px] text-muted-foreground">
           <span className="hidden sm:inline">
             La génération prend en moyenne 4 à 8 secondes.
           </span>
         </div>
 
-        {error ? (
+        {lengthError || error ? (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
-            {error}
+            {lengthError ?? error}
           </div>
         ) : null}
 
