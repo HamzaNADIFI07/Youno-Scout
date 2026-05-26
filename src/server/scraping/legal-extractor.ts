@@ -1,25 +1,85 @@
 import * as cheerio from "cheerio";
 import type { LegalInfo } from "@/lib/types";
 
-const LEGAL_PATH_PATTERNS = [
-  /\/mentions[-_]?l[ée]gales?/i,
+const LEGAL_PATH_PATTERNS: RegExp[] = [
+  /\/mentions?[-_]?l[ée]gales?/i,
+  /\/informations?[-_]?juridiques?/i,
+  /\/info[-_]?juridique/i,
+  /\/donn[ée]es?[-_]?l[ée]gales?/i,
   /\/legal[-_]?notice/i,
-  /\/legal-info/i,
+  /\/legal[-_]?information/i,
+  /\/legal[-_]?info/i,
+  /\/legal[-_]?disclosure/i,
+  /\/legal[-_]?statement/i,
   /\/legal$/i,
+  /\/legal\//i,
+  /\/about\/legal/i,
+  /\/company\/legal/i,
+  /\/imprint/i,
+  /\/impressum/i,
+  /\/avviso[-_]?legale/i,
+  /\/aviso[-_]?legal/i,
+  /\/colofon/i,
+  /\/disclaimer/i,
   /\/cgu/i,
   /\/cgv/i,
-  /\/conditions[-_]?g[ée]n[ée]rales/i,
-  /\/imprint/i,
-  /\/about\/legal/i,
+  /\/eula/i,
+  /\/conditions?[-_]?(?:g[ée]n[ée]rales|d[-_]?utilisation|de[-_]?vente|d[-_]?achat)/i,
+  /\/terms(?:[-_]?(?:of[-_]?(?:service|use|sale)|and[-_]?conditions))?(?:\/|$)/i,
+  /\/tos(?:\/|$)/i,
+  /\/privacy(?:[-_]?policy)?(?:\/|$)/i,
+  /\/politique[-_]?(?:de[-_]?confidentialit[ée]|cookies)/i,
+  /\/datenschutz/i,
+  /\/cookies?[-_]?(?:policy|notice)/i,
+];
+
+const LEGAL_LABELS = [
+  "mentions légales",
+  "mentions legales",
+  "informations juridiques",
+  "informations légales",
+  "informations legales",
+  "legal notice",
+  "legal information",
+  "legal terms",
+  "imprint",
+  "impressum",
+  "aviso legal",
+  "avviso legale",
+  "informazioni legali",
+  "conditions générales",
+  "conditions generales",
+  "terms of service",
+  "terms of use",
+  "terms and conditions",
+  "privacy policy",
+  "politique de confidentialité",
 ];
 
 export function findLegalPagePath(internalLinks: string[]): string | undefined {
+  const paths = findLegalPagePaths(internalLinks);
+  return paths[0];
+}
+
+export function findLegalPagePaths(internalLinks: string[]): string[] {
+  const matches = new Set<string>();
   for (const link of internalLinks) {
     if (LEGAL_PATH_PATTERNS.some((re) => re.test(link))) {
-      return link;
+      matches.add(link);
     }
   }
-  return undefined;
+  return Array.from(matches);
+}
+
+export function findLegalLinksFromActionable(actionable: { text: string; href: string }[]): string[] {
+  const matches = new Set<string>();
+  for (const link of actionable) {
+    const lower = link.text.toLowerCase().trim();
+    if (LEGAL_LABELS.some((label) => lower.includes(label))) {
+      if (link.href) matches.add(link.href);
+    }
+  }
+  return Array.from(matches);
 }
 
 export function extractLegalInfo(input: {

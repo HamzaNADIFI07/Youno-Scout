@@ -13,7 +13,8 @@ import { detectSignals } from "@/server/scraping/signals";
 import { detectCustomSignals } from "@/server/scraping/custom-signals";
 import {
   extractLegalInfo,
-  findLegalPagePath,
+  findLegalLinksFromActionable,
+  findLegalPagePaths,
 } from "@/server/scraping/legal-extractor";
 import { LlmError, analyzeWithLlm } from "@/server/llm/analyzer";
 import { scoreIcp } from "@/server/scoring/icp-scorer";
@@ -113,6 +114,7 @@ export async function runDiscovery(
   const legal = await extractLegalFromSite({
     baseUrl: fetched.finalUrl,
     internalLinks: primary.internalLinks,
+    actionableLinks: primary.actionableLinks,
   });
 
   const people: Person[] = (company.people ?? []).map((p) => ({
@@ -160,15 +162,50 @@ export async function runDiscovery(
 async function extractLegalFromSite(input: {
   baseUrl: string;
   internalLinks: string[];
+  actionableLinks: { text: string; href: string }[];
 }): Promise<LegalInfo> {
-  const path = findLegalPagePath(input.internalLinks);
-  if (!path) return {};
-
-  try {
-    const fullUrl = new URL(path, input.baseUrl).toString();
-    const legalFetched = await fetchPage(fullUrl);
-    return extractLegalInfo({ html: legalFetched.html, pageUrl: fullUrl });
-  } catch {
-    return {};
+  const candidates: string[] = [];
+  for (const path of findLegalPagePaths(input.internalLinks)) {
+    try {
+      candidates.push(new URL(path, input.baseUrl).toString());
+    } catch {
+      // ignore invalid resolution
+    }
   }
+  for (const href of findLegalLinksFromActionable(input.actionableLinks)) {
+    candidates.push(href);
+  }
+
+  const uniqueCandidates = Array.from(new Set(candidates)).slice(0, 3);
+  if (uniqueCandidates.length === 0) return {};
+
+  let merged: LegalInfo = {};
+  for (const fullUrl of uniqueCandidates) {
+    try {
+      const legalFetched = await fetchPage(fullUrl);
+      const extracted = extractLegalInfo({
+        html: legalFetched.html,
+        pageUrl: fullUrl,
+      });
+      merged = mergeLegal(merged, extracted);
+    } catch {
+      // ignore failed legal page fetch
+    }
+  }
+  return merged;
+}
+
+function mergeLegal(base: LegalInfo, next: LegalInfo): LegalInfo {
+  return {
+    legalName: base.legalName ?? next.legalName,
+    legalForm: base.legalForm ?? next.legalForm,
+    registrationNumber: base.registrationNumber ?? next.registrationNumber,
+    vatNumber: base.vatNumber ?? next.vatNumber,
+    shareCapital: base.shareCapital ?? next.shareCapital,
+    rcs: base.rcs ?? next.rcs,
+    headquartersAddress: base.headquartersAddress ?? next.headquartersAddress,
+    publicationDirector: base.publicationDirector ?? next.publicationDirector,
+    hostingProvider: base.hostingProvider ?? next.hostingProvider,
+    legalPageUrl: base.legalPageUrl ?? next.legalPageUrl,
+  };
 }
