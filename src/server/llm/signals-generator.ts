@@ -1,12 +1,12 @@
-import Groq from "groq-sdk";
-import { DEFAULT_MODEL } from "@/lib/constants";
 import {
   CustomSignalSchema,
   type CustomSignal,
   type CustomSignalCategory,
 } from "@/lib/types";
+import { LlmProviderError, callLlm } from "@/server/llm/providers";
 
 const TOOL_NAME = "submit_signals";
+const REJECT_TOOL_NAME = "report_invalid_input";
 
 const SYSTEM_PROMPT = `You are a senior B2B Go-To-Market expert helping a sales team qualify prospect companies.
 
@@ -17,9 +17,12 @@ CONTEXT
 
 ABSOLUTE RULES
 1. Every signal describes a CHARACTERISTIC OF THE PROSPECT (target company), not of the user (seller).
-2. Labels must be PHRASED FROM THE PROSPECT'S PERSPECTIVE in French, action-oriented :
-   - GOOD : "Recrute un Head of RevOps", "Utilise déjà HubSpot", "Vient de lever en Series A"
-   - BAD : "Notre cible", "Nos clients idéaux", "Entreprise intéressée par nos outils"
+2. Labels MUST use the standard B2B prospecting NOUN-PHRASE form (industry standard — same style as Clearbit, Apollo, Cognism, Lemlist). NEVER use "Je", "J'ai", "Mon", "Mes", "Nous". NEVER use full sentences. Write the observable characteristic directly, telegraphic and action-oriented. Max ~10 words.
+   - GOOD : "Plusieurs clients payants et produit lancé", "Recrute Head of RevOps", "Utilise HubSpot", "Levée Series A récente", "Pricing public visible", "Équipe de 5 à 80 personnes", "Pas de version mobile", "Stack: Salesforce + Outreach", "Présence en France", "Blog actif sur le RevOps"
+   - BAD (first person) : "Je recrute un Head of RevOps", "J'utilise déjà HubSpot", "J'ai plusieurs clients payants"
+   - BAD (full sentences) : "Le prospect correspond à...", "L'entreprise utilise..."
+   - BAD (seller perspective) : "Notre cible", "Nos clients idéaux"
+   - BAD (compound with multiple "ou") : "Recrute un Head of Sales ou Head of Growth ou un VP Sales" — pick ONE specific thing per signal, or generate two separate signals.
 3. The RATIONALE must follow the format : "[Caractéristique observable chez le prospect] → [pourquoi cela en fait un bon prospect pour l'offre de l'utilisateur]". NEVER say "intéressée par nos outils" — that's marketing fluff, not a rationale.
 4. Each signal MUST be detectable from public website HTML : text content + URL paths only.
 5. Mix keyword detection (mots-clés) and url-pattern detection (paths).
@@ -39,7 +42,14 @@ ABSOLUTE RULES
 
 If the user provides an existing list of signals and an instruction (eg. "remove X", "add Y"), return the UPDATED list reflecting their instruction. Otherwise, generate a fresh list.
 
-Always call the submit_signals tool with the final list. Never output free text.`;
+INPUT QUALITY CHECK
+Before generating signals, evaluate whether the user input contains enough exploitable information :
+- "Generate from scratch" mode : the description must include at least a hint of WHAT the user sells AND WHO they target. Pure gibberish ("asdfasdf"), filler text, single vague sentences ("je vends des trucs aux boîtes"), or descriptions with zero specifics are NOT usable.
+- "Modify list" mode : the instruction must be understandable and actionable in the context of the existing list (eg. "remove the funding signal", "add a Notion detection"). Random text, off-topic requests, or unintelligible instructions are NOT usable.
+- If the input is unusable, call the report_invalid_input tool with a short French reason explaining what is missing (eg. "L'offre n'est pas décrite", "L'ICP cible n'est pas précisé", "L'instruction n'est pas compréhensible"). Do NOT call submit_signals in that case.
+- When in doubt, prefer calling submit_signals with the best signals you can derive — only reject when the input is genuinely unusable.
+
+If the input is usable, call submit_signals with the final list. Never output free text.`;
 
 const INPUT_SCHEMA = {
   type: "object",
@@ -57,7 +67,8 @@ const INPUT_SCHEMA = {
           },
           category: {
             type: "string",
-            enum: ["joignabilite", "maturite", "croissance", "produit", "fit"],
+            description:
+              "One of: joignabilite, maturite, croissance, produit, fit. Use the closest match; the server will normalize it.",
           },
           weight: {
             type: "number",
@@ -95,9 +106,23 @@ const INPUT_SCHEMA = {
   required: ["signals"],
 };
 
+const REJECT_SCHEMA = {
+  type: "object",
+  properties: {
+    reason: {
+      type: "string",
+      description:
+        "Short French reason (5-25 words) explaining what is missing from the user input — eg. 'L'offre n'est pas décrite', 'L'ICP cible n'est pas précisé', 'L'instruction est incompréhensible'.",
+    },
+  },
+  required: ["reason"],
+};
+
 export class SignalsGeneratorError extends Error {
-  constructor(message: string) {
+  reason?: string;
+  constructor(message: string, reason?: string) {
     super(message);
+    this.reason = reason;
     this.name = "SignalsGeneratorError";
   }
 }
@@ -108,20 +133,11 @@ export async function generateCustomSignals(input: {
   currentSignals?: CustomSignal[];
   instruction?: string;
 }): Promise<CustomSignal[]> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    throw new SignalsGeneratorError("GROQ_API_KEY missing on the server.");
-  }
-
-  const client = new Groq({ apiKey });
-  const model = process.env.GROQ_MODEL ?? DEFAULT_MODEL;
   const userMessage = buildUserMessage(input);
 
+  let response;
   try {
-    const response = await client.chat.completions.create({
-      model,
-      temperature: 0.3,
-      max_tokens: 2000,
+    response = await callLlm("signals", {
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userMessage },
@@ -132,58 +148,132 @@ export async function generateCustomSignals(input: {
           function: {
             name: TOOL_NAME,
             description:
-              "Submit the final list of custom GTM signals tailored to the user's ICP.",
+              "Submit the final list of custom GTM signals tailored to the user's ICP. Only call this if the user input is usable.",
             parameters: INPUT_SCHEMA,
           },
         },
+        {
+          type: "function",
+          function: {
+            name: REJECT_TOOL_NAME,
+            description:
+              "Reject the request when the user input is gibberish, too vague, or unintelligible. Provide a short French reason. Call this INSTEAD of submit_signals — never call both.",
+            parameters: REJECT_SCHEMA,
+          },
+        },
       ],
-      tool_choice: { type: "function", function: { name: TOOL_NAME } },
+      toolChoice: "required",
+      temperature: 0.3,
+      maxTokens: 2000,
     });
-
-    const message = response.choices[0]?.message;
-    const toolCall = message?.tool_calls?.[0];
-
-    if (!toolCall || toolCall.type !== "function") {
-      throw new SignalsGeneratorError("LLM did not return a structured payload.");
-    }
-
-    let rawArgs: unknown;
-    try {
-      rawArgs = JSON.parse(toolCall.function.arguments);
-    } catch {
-      throw new SignalsGeneratorError("LLM returned malformed JSON.");
-    }
-
-    const args = rawArgs as { signals?: unknown };
-    if (!Array.isArray(args.signals)) {
-      throw new SignalsGeneratorError("LLM response missing the signals array.");
-    }
-
-    const parsed: CustomSignal[] = [];
-    for (const item of args.signals) {
-      const withId = { ...(item as object), id: generateId() };
-      const validation = CustomSignalSchema.safeParse(withId);
-      if (validation.success) {
-        parsed.push(normalizeSignal(validation.data));
-      }
-    }
-
-    if (parsed.length < 4) {
-      throw new SignalsGeneratorError(
-        "LLM returned too few valid signals. Please try again."
-      );
-    }
-
-    return parsed;
   } catch (error) {
-    if (error instanceof SignalsGeneratorError) throw error;
-    if (error instanceof Groq.APIError) {
-      throw new SignalsGeneratorError(`Groq API error: ${error.message}`);
+    if (error instanceof LlmProviderError) {
+      if (error.code === "no-providers") {
+        throw new SignalsGeneratorError("no-providers");
+      }
+      if (error.code === "quota") {
+        throw new SignalsGeneratorError("quota-exceeded");
+      }
+      throw new SignalsGeneratorError("llm-failed");
     }
-    throw new SignalsGeneratorError(
-      error instanceof Error ? error.message : "Unknown LLM error."
-    );
+    throw new SignalsGeneratorError("llm-failed");
   }
+
+  const toolCall = response.toolCalls[0];
+  if (!toolCall) {
+    throw new SignalsGeneratorError("invalid-output");
+  }
+
+  let rawArgs: unknown;
+  try {
+    rawArgs = JSON.parse(toolCall.arguments);
+  } catch {
+    throw new SignalsGeneratorError("invalid-output");
+  }
+
+  if (toolCall.name === REJECT_TOOL_NAME) {
+    const reason =
+      typeof (rawArgs as { reason?: unknown })?.reason === "string"
+        ? ((rawArgs as { reason: string }).reason.trim() || undefined)
+        : undefined;
+    throw new SignalsGeneratorError("unintelligible-input", reason);
+  }
+
+  if (toolCall.name !== TOOL_NAME) {
+    throw new SignalsGeneratorError("invalid-output");
+  }
+
+  const args = rawArgs as { signals?: unknown };
+  if (!Array.isArray(args.signals)) {
+    throw new SignalsGeneratorError("invalid-output");
+  }
+
+  const parsed: CustomSignal[] = [];
+  for (const item of args.signals) {
+    const raw = item as Record<string, unknown>;
+    const normalizedCategory = normalizeCategory(raw.category);
+    if (!normalizedCategory) continue;
+    const candidate = {
+      ...raw,
+      category: normalizedCategory,
+      id: generateId(),
+    };
+    const validation = CustomSignalSchema.safeParse(candidate);
+    if (validation.success) {
+      parsed.push(normalizeSignal(validation.data));
+    }
+  }
+
+  if (parsed.length < 4) {
+    throw new SignalsGeneratorError("invalid-output");
+  }
+
+  return parsed;
+}
+
+const CATEGORY_ALIASES: Record<string, CustomSignalCategory> = {
+  joignabilite: "joignabilite",
+  joignabilité: "joignabilite",
+  contact: "joignabilite",
+  contactabilite: "joignabilite",
+  reachability: "joignabilite",
+  maturite: "maturite",
+  maturité: "maturite",
+  maturity: "maturite",
+  enterprise: "maturite",
+  compliance: "maturite",
+  brand: "maturite",
+  croissance: "croissance",
+  growth: "croissance",
+  hiring: "croissance",
+  funding: "croissance",
+  expansion: "croissance",
+  intent: "croissance",
+  produit: "produit",
+  product: "produit",
+  tech: "produit",
+  technology: "produit",
+  stack: "produit",
+  "culture tech": "produit",
+  integrations: "produit",
+  fit: "fit",
+  icp: "fit",
+  size: "fit",
+  industry: "fit",
+  geography: "fit",
+  segment: "fit",
+};
+
+function normalizeCategory(value: unknown): CustomSignalCategory | null {
+  if (typeof value !== "string") return null;
+  const key = value.trim().toLowerCase();
+  if (!key) return null;
+  const direct = CATEGORY_ALIASES[key];
+  if (direct) return direct;
+  for (const alias of Object.keys(CATEGORY_ALIASES)) {
+    if (key.includes(alias)) return CATEGORY_ALIASES[alias];
+  }
+  return null;
 }
 
 function buildUserMessage(input: {
