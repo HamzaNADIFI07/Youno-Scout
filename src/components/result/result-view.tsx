@@ -17,27 +17,33 @@ type Props = {
 
 export function ResultView({ result }: Props) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <CompanyHeader result={result} />
 
       <DescriptionCard result={result} />
 
-      {result.enrichment ? (
-        <EnrichmentCard enrichment={result.enrichment} />
-      ) : null}
-
-      <ContactsCard contacts={result.contacts} />
-
-      <PeopleCard people={result.people} />
-
-      <LegalCard legal={result.legal} />
-
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <ScoreCard icp={result.icp} />
         <SignalsCard signals={result.signals} />
       </div>
 
-      <TechStackCard techStack={result.techStack} />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ContactsCard contacts={result.contacts} />
+        <PeopleCard people={result.people} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <LegalCard legal={result.legal} />
+        {result.enrichment ? (
+          <EnrichmentCard enrichment={result.enrichment} />
+        ) : (
+          <TechStackCard techStack={result.techStack} />
+        )}
+      </div>
+
+      {result.enrichment ? (
+        <TechStackCard techStack={result.techStack} />
+      ) : null}
 
       <div className="flex items-center justify-end gap-2 pt-2 text-xs text-muted-foreground">
         <Clock className="size-3" aria-hidden />
