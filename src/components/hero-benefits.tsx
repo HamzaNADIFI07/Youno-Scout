@@ -26,26 +26,29 @@ const PILL_SHADOW =
 
 export function HeroBenefits() {
   return (
-    <div className="mt-14 grid w-full max-w-5xl grid-cols-1 gap-10 sm:mt-16 sm:grid-cols-3 sm:gap-8">
+    <div
+      className="mt-10 -mx-6 flex w-screen max-w-none gap-4 overflow-x-auto px-6 pb-2 sm:mx-0 sm:mt-12 sm:w-full sm:max-w-5xl sm:overflow-visible sm:px-0 sm:pb-0"
+      style={{ scrollbarWidth: "none" }}
+    >
       {BENEFITS.map(({ icon: Icon, label, description }) => (
         <div
           key={label}
-          className="flex flex-col items-center gap-4 text-center"
+          className="flex w-65 shrink-0 flex-col items-center gap-3 text-center sm:w-auto sm:flex-1"
         >
           <div
-            className="inline-flex items-center gap-3 rounded-full bg-white px-6 py-3"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5"
             style={{ boxShadow: PILL_SHADOW }}
           >
             <Icon
-              className="size-5 text-foreground"
+              className="size-4 text-foreground"
               aria-hidden
               strokeWidth={2}
             />
-            <span className="text-base font-medium text-foreground">
+            <span className="text-sm font-medium text-foreground">
               {label}
             </span>
           </div>
-          <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+          <p className="max-w-xs text-xs leading-relaxed text-muted-foreground sm:text-sm">
             {description}
           </p>
         </div>

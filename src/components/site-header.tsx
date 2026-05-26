@@ -27,20 +27,20 @@ export function SiteHeader({
             style={{
               background:
                 "linear-gradient(#f5f5eb, #f5f5eb) padding-box, linear-gradient(90deg, #ce562f 0%, #e89476 50%, #ce562f 100%) border-box",
-              border: "2px solid transparent",
-              borderRadius: "12px",
+              border: "1.5px solid transparent",
+              borderRadius: "9px",
               color: "#ce562f",
               boxShadow:
-                "0 4px 12px -4px rgba(206,86,47,0.3), 0 1px 2px rgba(0,0,0,0.04)",
+                "0 2px 6px -2px rgba(206,86,47,0.25), 0 1px 2px rgba(0,0,0,0.04)",
               textShadow: "0 1px 0 rgba(255,255,255,0.4)",
             }}
-            className="group inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold transition-all hover:-translate-y-px"
+            className="group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-px sm:px-4 sm:text-sm"
           >
-            <Sparkles className="size-4" aria-hidden />
+            <Sparkles className="size-3.5" aria-hidden />
             Passer en Premium
             <span
               aria-hidden
-              className="inline-block transition-transform group-hover:translate-x-0.5"
+              className="hidden transition-transform group-hover:translate-x-0.5 sm:inline-block"
             >
               →
             </span>
