@@ -26,7 +26,7 @@ export function SignalsCard({ signals }: Props) {
             Signaux GTM
           </CardTitle>
           <span className="text-xs tabular-nums text-muted-foreground">
-            {detectedCount} / {selectedSignals.length} renseignés
+            {detectedCount} / {selectedSignals.length} détectés
             {excludedCount > 0 ? ` · ${excludedCount} exclus` : ""}
           </span>
         </div>
@@ -70,18 +70,16 @@ export function SignalsCard({ signals }: Props) {
                     >
                       {signal.label}
                     </p>
-                    {!inactive ? (
+                    {!inactive && signal.value ? (
                       <span className="text-sm text-foreground/85">
                         :{" "}
-                        <span
-                          className={
-                            signal.detected
-                              ? "font-semibold text-[#ce562f]"
-                              : "italic text-muted-foreground"
-                          }
-                        >
-                          {signal.value ?? "Non renseigné"}
+                        <span className="font-semibold text-[#ce562f]">
+                          {signal.value}
                         </span>
+                      </span>
+                    ) : !inactive && !signal.detected ? (
+                      <span className="text-xs italic text-muted-foreground">
+                        Non détecté
                       </span>
                     ) : null}
                   </div>
