@@ -31,7 +31,7 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
     backgroundImage:
       "linear-gradient(90deg, #ce562f 0%, #e89476 50%, #ce562f 100%)",
     color: "#ffffff",
-    borderRadius: "14px",
+    borderRadius: "10px",
     border: "none",
     fontWeight: 600,
     textShadow: "0 1px 0 rgba(0,0,0,0.2)",
@@ -72,7 +72,7 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
           autoComplete="off"
           spellCheck={false}
           aria-label="URL du site web à analyser"
-          className="h-14 flex-1 border-0 bg-transparent text-base shadow-none focus-visible:outline-none focus-visible:ring-0"
+          className="h-11 flex-1 border-0 bg-transparent text-sm shadow-none focus-visible:outline-none focus-visible:ring-0 sm:text-base"
         />
         <button
           type="submit"
@@ -85,17 +85,17 @@ export function AnalyzeForm({ value, onChange, onSubmit, isLoading }: Props) {
           }}
           onMouseDown={() => setIsPressing(true)}
           onMouseUp={() => setIsPressing(false)}
-          className="inline-flex h-14 items-center justify-center gap-2 whitespace-nowrap px-10 text-base outline-none"
+          className="inline-flex h-11 items-center justify-center gap-1.5 whitespace-nowrap px-5 text-sm outline-none"
         >
           {isLoading ? (
             <>
-              <Loader2 className="size-5 animate-spin" aria-hidden />
+              <Loader2 className="size-4 animate-spin" aria-hidden />
               Analyse en cours
             </>
           ) : (
             <>
               Analyser
-              <ArrowRight className="size-5" aria-hidden />
+              <ArrowRight className="size-4" aria-hidden />
             </>
           )}
         </button>

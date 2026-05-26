@@ -131,7 +131,7 @@ export function PremiumModal() {
           Des signaux GTM taillés pour <em className="not-italic text-[#ce562f]">votre</em> ICP.
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Le mode standard détecte 12 signaux génériques. Passez en Premium
+          Le mode standard détecte 10 signaux génériques. Passez en Premium
           pour décrire votre business à l’IA et générer des signaux 100%
           adaptés à votre prospection.
         </p>
@@ -174,13 +174,13 @@ export function PremiumModal() {
                 "linear-gradient(90deg, #ce562f 0%, #e89476 50%, #ce562f 100%)",
               boxShadow: TRIGGER_SHADOW,
               color: "#ffffff",
-              borderRadius: "12px",
+              borderRadius: "10px",
               textShadow: "0 1px 0 rgba(0,0,0,0.2)",
             }}
-            className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap px-6 text-sm font-semibold transition-transform hover:-translate-y-px"
+            className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap px-4 text-xs font-semibold transition-transform hover:-translate-y-px sm:px-5 sm:text-sm"
           >
             Activer le mode Premium
-            <ArrowRight className="size-4" aria-hidden />
+            <ArrowRight className="size-3.5" aria-hidden />
           </Link>
         </div>
       </div>
