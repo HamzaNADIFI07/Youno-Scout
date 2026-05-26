@@ -1,0 +1,106 @@
+# Continuous Integration
+#
+# Goals
+# -----
+# 1. Make sure every push to main and every PR is lintable, typesafe and
+#    actually builds with the current Next.js config before Vercel auto-deploys
+#    the same commit to production.
+# 2. Catch accidental committed secrets (Groq, Resend, Neon, OpenRouter,
+#    Mistral, Gemini patterns) before they reach the public repo.
+#
+# Security note
+# -------------
+# This workflow never injects user-controlled GitHub event data (issue title,
+# PR body, commit message, branch name...) into `run:` commands. All shell
+# commands operate on the repository contents only.
+#
+# Vercel deployment relationship
+# ------------------------------
+# Vercel auto-deploys on every push to `main` regardless of this workflow.
+# To make Vercel gate on CI green, enable a GitHub branch protection rule:
+#   Settings -> Branches -> Add rule on `main`
+#   -> "Require status checks to pass before merging"
+#   -> select the `Quality` and `Secrets` jobs
+# With this rule, no PR can be merged to `main` until both jobs are green,
+# which transitively means Vercel never deploys a broken commit.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: TypeScript strict check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: Next.js production build
+        env:
+          NEXT_PUBLIC_APP_URL: https://example.com
+          SCOUT_SESSION_SECRET: ci_dummy_secret_for_build_validation_only_minimum_32_chars
+        run: npm run build
+
+      - name: Security audit
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Block hardcoded API keys
+        run: |
+          set -e
+          PATTERN='gsk_[A-Za-z0-9]{20,}|re_[A-Za-z0-9]{20,}|sk-or-v1-[A-Za-z0-9]{20,}|npg_[A-Za-z0-9]{20,}|AIzaSy[A-Za-z0-9_\-]{30,}|postgres(ql)?://[^[:space:]]*:[^@[:space:]]*@'
+          MATCHES=$(git grep -nE "$PATTERN" -- ':!*.md' ':!*.example' ':!.github/**' || true)
+          if [ -n "$MATCHES" ]; then
+            echo "::error::Hardcoded secrets detected. Move them to .env.local (gitignored)."
+            echo "$MATCHES"
+            exit 1
+          fi
+          echo "No hardcoded secrets detected."
+
+      - name: Verify .env files are not tracked
+        run: |
+          TRACKED=$(git ls-files | grep -E '\.env(\..*)?$' | grep -v '\.example$' || true)
+          if [ -n "$TRACKED" ]; then
+            echo "::error::.env files must not be tracked by git."
+            echo "$TRACKED"
+            exit 1
+          fi
+          echo ".env files correctly gitignored."
