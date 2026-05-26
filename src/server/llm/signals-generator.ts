@@ -8,19 +8,34 @@ import {
 
 const TOOL_NAME = "submit_signals";
 
-const SYSTEM_PROMPT = `You are a senior B2B Go-To-Market expert helping a sales team build a custom prospect-scoring model.
+const SYSTEM_PROMPT = `You are a senior B2B Go-To-Market expert helping a sales team qualify prospect companies.
 
-Your job: given a description of the user's company, product and Ideal Customer Profile (ICP), produce 8 to 12 highly specific GTM signals that, when found on a prospect's website, indicate that the prospect is a strong fit for the user's offering.
+CONTEXT
+- The USER is the seller. They describe their company, their product, AND the profile of the prospects they want to target (their ICP).
+- The TARGET is the prospect company whose website will be analysed.
+- Your job: generate GTM signals that QUALIFY THE PROSPECT, based on what can be found on the PROSPECT'S website.
 
-Rules:
-- Each signal MUST be concrete and detectable from public website HTML (text + URL paths).
-- Mix two detection mechanisms: keywords found in the page text AND URL path patterns.
-- Prioritize signals that show INTENT TO BUY (growth, hiring, expansion, fundraising, modernization) or strong fit with the user's ICP.
-- Avoid generic signals such as "has a website" or "uses HTTPS".
-- Use 1-10 weights: weight 9-10 for strong buying-intent signals, 5-8 for medium, 1-4 for weaker context.
-- Keep labels short, in French, action-oriented (eg. "Boîte en hyper-croissance", "Présence européenne", "Stack data moderne").
-- Rationale must explain WHY this signal matters for THIS user's prospection (in French, one sentence).
-- Categories: "joignabilite", "maturite", "croissance", "produit", "fit".
+ABSOLUTE RULES
+1. Every signal describes a CHARACTERISTIC OF THE PROSPECT (target company), not of the user (seller).
+2. Labels must be PHRASED FROM THE PROSPECT'S PERSPECTIVE in French, action-oriented :
+   - GOOD : "Recrute un Head of RevOps", "Utilise déjà HubSpot", "Vient de lever en Series A"
+   - BAD : "Notre cible", "Nos clients idéaux", "Entreprise intéressée par nos outils"
+3. The RATIONALE must follow the format : "[Caractéristique observable chez le prospect] → [pourquoi cela en fait un bon prospect pour l'offre de l'utilisateur]". NEVER say "intéressée par nos outils" — that's marketing fluff, not a rationale.
+4. Each signal MUST be detectable from public website HTML : text content + URL paths only.
+5. Mix keyword detection (mots-clés) and url-pattern detection (paths).
+6. Categories must match the signal type :
+   - "fit" : the prospect matches a key ICP criterion (right size, right industry, right stack)
+   - "croissance" : prospect shows growth / buying intent signals (hiring, funding, expansion)
+   - "maturite" : prospect is mature enough to buy (cases studies, compliance, established team)
+   - "produit" : prospect's product profile matches (uses target tools, has API, exposes integrations)
+   - "joignabilite" : prospect is reachable (contact form, demo CTA, sales team visible)
+   Do NOT use "joignabilite" for things like "presence in Europe" — that is "fit".
+7. Weights 1-10 :
+   - 9-10 : strong buy signals (active hiring of the target persona, recent funding, specific tool match)
+   - 5-8 : medium signals (matching size, geographic fit, content marketing maturity)
+   - 1-4 : weak context signals
+8. If the user provides ANTI-SIGNALS (who is NOT their target), use them to REFINE the signals : avoid generating signals that match anti-targets, and bias signals toward exclusionary criteria when relevant.
+9. Generate 8 to 12 signals.
 
 If the user provides an existing list of signals and an instruction (eg. "remove X", "add Y"), return the UPDATED list reflecting their instruction. Otherwise, generate a fresh list.
 
@@ -179,32 +194,38 @@ function buildUserMessage(input: {
 }): string {
   const lines: string[] = [];
 
-  lines.push("# Business description (français)");
+  lines.push("# Seller context (in French)");
+  lines.push(
+    "Below is the description provided by the user (the SELLER). They describe their own company AND the profile of prospects they want to target. Use this to build signals that QUALIFY the PROSPECT — not signals that describe the seller."
+  );
+  lines.push("");
   lines.push(input.description.trim());
 
   if (input.targetUrl) {
     lines.push("");
-    lines.push(`Target prospect URL: ${input.targetUrl}`);
+    lines.push(
+      `Example prospect URL the seller will analyse next: ${input.targetUrl}. Tailor signals so they can plausibly be detected on similar prospect websites.`
+    );
   }
 
   if (input.currentSignals && input.currentSignals.length > 0) {
     lines.push("");
-    lines.push("# Existing signals");
+    lines.push("# Existing signals to revise");
     lines.push(JSON.stringify(stripIds(input.currentSignals), null, 2));
   }
 
   if (input.instruction) {
     lines.push("");
-    lines.push("# User instruction (french natural language)");
+    lines.push("# User instruction (natural language)");
     lines.push(input.instruction.trim());
     lines.push("");
     lines.push(
-      "Update the list to reflect this instruction. Keep IDs stable when possible. Return the FULL updated list."
+      "Update the list to reflect this instruction. Keep stable signals when possible. Return the FULL updated list."
     );
   } else {
     lines.push("");
     lines.push(
-      "Generate a fresh list of 8 to 12 signals tailored to the description above."
+      "Generate a fresh list of 8 to 12 signals that, when found on a prospect website, indicate the prospect matches the seller's ICP. Each signal label must describe a characteristic of the PROSPECT, not of the seller."
     );
   }
 

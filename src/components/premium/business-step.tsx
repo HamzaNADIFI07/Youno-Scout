@@ -35,12 +35,10 @@ export function BusinessStep({
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
       <h2 className="text-lg font-semibold tracking-tight">
-        Décrivez votre entreprise et votre ICP
+        Décrivez votre entreprise et le profil de vos prospects
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Plus la description est précise, meilleurs seront les signaux. Mentionnez
-        votre offre, votre cible idéale et les critères qui qualifient un bon
-        prospect.
+        Plus vous décrivez précisément <span className="font-medium text-foreground">ce que vous cherchez chez vos prospects</span> (et pas seulement ce que vous vendez), plus les signaux générés seront actionnables. Mentionnez votre offre, votre ICP, les signaux d’achat et idéalement vos anti-signaux (qui n’est PAS votre cible).
       </p>
 
       <form
@@ -56,7 +54,7 @@ export function BusinessStep({
             onChange={(event) => onDescriptionChange(event.target.value)}
             disabled={isGenerating}
             rows={7}
-            placeholder="Exemple : Nous vendons Cargo, une plateforme d'orchestration GTM pour les équipes RevOps de scale-ups B2B SaaS. Nos clients cibles ont 50 à 300 employés, ont levé en série A ou B, et utilisent déjà HubSpot. Le persona décisionnaire est Head of RevOps ou Founder."
+            placeholder="Exemple structuré :&#10;&#10;Notre offre :&#10;Nous vendons Cargo, une plateforme d'orchestration GTM…&#10;&#10;Notre ICP :&#10;Scale-ups SaaS B2B, 50 à 300 employés, ont levé Série A/B, utilisent HubSpot ou Salesforce…&#10;&#10;Les signaux d'achat (ce que je veux DÉTECTER chez le prospect) :&#10;— Recrute un Head of RevOps ou GTM Engineer&#10;— Vient de lever des fonds (Series A/B)&#10;— Affiche un partenariat HubSpot ou Salesforce&#10;— Publie sur le RevOps / GTM Engineering&#10;&#10;Anti-signaux (qui n'est PAS la cible) :&#10;— Boîtes B2C, agences marketing classiques, < 1M€ d'ARR"
             className="block w-full resize-y rounded-xl bg-transparent p-4 text-sm leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/70"
           />
         </div>
