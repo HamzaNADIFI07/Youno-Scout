@@ -170,7 +170,7 @@ function FormBlock({
           lineHeight: 1.2,
         }}
       >
-        Indiquez votre email pour lancer l'analyse.
+        Indiquez votre email pour lancer l’analyse.
       </h2>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
         On vous envoie un lien de confirmation, puis vous pouvez revenir
@@ -208,7 +208,7 @@ function FormBlock({
             className="mt-0.5 size-4 accent-[#ce562f]"
           />
           <span className="text-xs leading-relaxed text-foreground">
-            J'accepte les conditions d'utilisation de Scout.
+            J’accepte les conditions d’utilisation de Scout.
             <span className="text-destructive"> *</span>
           </span>
         </label>
@@ -279,13 +279,13 @@ function SentBlock({ email }: { email: string }) {
         Vérifiez votre boîte mail.
       </h2>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-        On vient d'envoyer un lien de confirmation à{" "}
+        On vient d’envoyer un lien de confirmation à{" "}
         <span className="font-semibold text-foreground">{email}</span>.
-        Cliquez sur le bouton dans l'email, puis revenez ici pour lancer
-        l'analyse.
+        Cliquez sur le bouton dans l’email, puis revenez ici pour lancer
+        l’analyse.
       </p>
       <p className="mt-4 text-[11px] text-muted-foreground">
-        Pas d'email après 2 minutes ? Vérifiez vos spams.
+        Pas d’email après 2 minutes ? Vérifiez vos spams.
       </p>
     </div>
   );

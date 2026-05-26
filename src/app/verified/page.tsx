@@ -78,11 +78,11 @@ function SuccessBlock({ email }: { email?: string }) {
         {email ? (
           <>
             <span className="font-semibold text-foreground">{email}</span>{" "}
-            est désormais vérifiée. Vous pouvez revenir sur la page d'accueil
+            est désormais vérifiée. Vous pouvez revenir sur la page d’accueil
             pour lancer votre analyse.
           </>
         ) : (
-          "Vous pouvez revenir sur la page d'accueil pour lancer votre analyse."
+          "Vous pouvez revenir sur la page d’accueil pour lancer votre analyse."
         )}
       </p>
     </>
@@ -103,7 +103,7 @@ function InvalidBlock() {
           lineHeight: 1.15,
         }}
       >
-        Ce lien de confirmation n'est plus valide.
+        Ce lien de confirmation n’est plus valide.
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
         Le lien a peut-être expiré ou a déjà été utilisé. Relancez la demande
@@ -130,7 +130,7 @@ function ErrorBlock() {
         Une erreur est survenue.
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-        Nous n'avons pas pu confirmer votre adresse. Réessayez dans quelques
+        Nous n’avons pas pu confirmer votre adresse. Réessayez dans quelques
         instants depuis la page Scout.
       </p>
     </>
