@@ -1,11 +1,10 @@
 # Scout — Account discovery depuis une URL
 
-> Module candidat pour **Konsole**, le SaaS Revenue Engineering de **Youno**.
+> Module Revenue Engineering pour **Konsole**, le SaaS de **Youno**.
 > Donnez une URL, Scout retourne un brief commercial exploitable en quelques secondes.
 
-- **Application en ligne** :https://youno-scout.vercel.app/
-- **Démonstration vidéo** :
-- **Repo GitHub** : [HamzaNADIFI07/Youno-Scout](https://github.com/HamzaNADIFI07/Youno-Scout)
+- **Application** : https://youno-scout.vercel.app
+- **Code source** : [HamzaNADIFI07/Youno-Scout](https://github.com/HamzaNADIFI07/Youno-Scout)
 
 ---
 
@@ -314,7 +313,7 @@ C'est l'une des pièces les plus différenciantes de Scout. Plutôt que de dépe
 
 ### Pourquoi 4 fournisseurs ?
 
-Les free tiers LLM ont chacun leurs limites (par jour, par minute, ou en tokens). En production démo (test technique, vidéo Loom), il faut survivre aux saturations. **3 quotas indépendants + 1 pool de modèles partagé = ~99 % de disponibilité** sans toucher un centime.
+Les free tiers LLM ont chacun leurs limites (par jour, par minute, ou en tokens). Pour rester disponible en production sans coût récurrent, on combine plusieurs fournisseurs : **3 quotas indépendants + 1 pool de modèles partagé = ~99 % de disponibilité** sans toucher un centime.
 
 ### Spécialisation par tâche
 
@@ -645,7 +644,7 @@ Le template ([src/server/subscribers/email.ts](src/server/subscribers/email.ts))
 - Fonts Instrument Sans (titres) + DM Sans (corps)
 - Logo Youno officiel en en-tête (PNG hébergé dans `public/youno-logo.png`)
 - CTA arrondi orange avec bordure brune
-- Footer "Scout est un module candidat pour Konsole — Youno. You know. We build."
+- Footer "Scout — un module Konsole / Youno. You know. We build."
 
 ---
 
@@ -1313,7 +1312,7 @@ Pour reset le compteur de rate limit pendant les tests, allez sur Upstash Consol
 
 ## 24. Pertinence pour Konsole
 
-Scout est pensé comme **un module candidat pour Konsole** ET comme **un canal d'acquisition** pour Youno. Cette double-vocation est volontaire — elle s'inscrit dans la stratégie Product-Led Growth qui domine l'acquisition B2B SaaS depuis 5 ans[^openview].
+Scout est pensé à la fois comme **un module de Konsole** et comme **un canal d'acquisition** pour Youno. Cette double-vocation est volontaire — elle s'inscrit dans la stratégie Product-Led Growth qui domine l'acquisition B2B SaaS depuis 5 ans[^openview].
 
 ### 23.1 Scout dans le funnel AARRR de Youno
 
@@ -1420,7 +1419,7 @@ Scout reste **léger et stateless** côté business : il fait l'analyse, retourn
 | Trafic | Anonyme | Identifié (email vérifié) |
 | Sortie business | Rien | Lead qualifié + intent signal + enrichissement déclenchable |
 | Intégration Konsole | Aucune | Brique TOFU du funnel global |
-| Apport à Youno | Marketing brand awareness | **Pipeline réel** (leads, démos bookées) |
-| Différenciation Cas pratique | "J'ai codé l'API" | "J'ai pensé Acquisition → Revenu" |
+| Apport à Youno | Brand awareness | **Pipeline réel** (leads, démos bookées) |
+| Positionnement | Outil isolé | Première brique du funnel Youno |
 
-C'est cette dernière ligne qui résume le mieux l'intention derrière Scout : ne pas s'arrêter à un outil qui répond au brief, mais montrer comment ce même outil peut devenir **une brique du business de Youno**.
+L'intention produit derrière Scout : ne pas se limiter à un outil qui répond à un besoin ponctuel, mais en faire **une brique du business de Youno** qui alimente Konsole en leads qualifiés dès l'entrée du funnel.

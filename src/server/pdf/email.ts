@@ -138,7 +138,7 @@ function renderHtml(input: {
         </p>
       </div>
       <div class="footer">
-        Scout est un module candidat pour Konsole — Youno.<br />
+        Scout — un module Konsole / Youno.<br />
         <span class="brand">You know. We build.</span>
       </div>
     </div>
