@@ -259,7 +259,7 @@ Le mode Premium ajoute une étape de configuration de signaux sur-mesure via l'I
 
 ```mermaid
 flowchart TB
-    Start([Click 'Passer en Premium'])
+    Start(["Click 'Passer en Premium'"])
 
     Step1[Étape 1<br/>Saisie URL cible]
     Step2[Étape 2<br/>Description du business<br/>offre + ICP + signaux d'achat<br/>+ anti-signaux]
@@ -338,7 +338,7 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    Call[callLlm(task, params)]
+    Call["callLlm(task, params)"]
 
     P1{Provider 1<br/>configuré ?}
     P1Try[Essai provider 1<br/>modèle 1]
@@ -352,7 +352,7 @@ flowchart TB
     P3[…etc pour tous<br/>les providers]
 
     Done([Réponse LLM])
-    Fail([Erreur claire :<br/>'Tous les providers ont saturé,<br/>réessayez dans 5 min'])
+    Fail(["Erreur claire :<br/>'Tous les providers ont saturé,<br/>réessayez dans 5 min'"])
 
     Call --> P1
     P1 -->|Non, clé absente| P2
@@ -471,7 +471,7 @@ flowchart LR
 
     subgraph Merge["Logique de merge"]
         Merge1[Logo Clearbit<br/>remplace favicon scrapé]
-        Merge2[Emails Hunter<br/>fusionnent avec contacts<br/>(priorité API)]
+        Merge2["Emails Hunter<br/>fusionnent avec contacts<br/>(priorité API)"]
         Merge3[Infos juridiques<br/>API > scraping]
     end
 
@@ -659,15 +659,15 @@ flowchart TB
         Pay[Payload :<br/>{ sid, email, iat }]
         B64[JSON → base64url]
         Hmac[HMAC-SHA256<br/>avec SCOUT_SESSION_SECRET]
-        Token[Token =<br/>base64url(payload)<br/>.<br/>hmac]
+        Token["Token =<br/>base64url(payload)<br/>.<br/>hmac"]
     end
 
     subgraph CookieSet["Pose du cookie"]
-        Set[Set-Cookie scout_session=<br/>httpOnly + Secure(prod)<br/>+ SameSite=Lax<br/>+ maxAge=1an<br/>+ Path=/]
+        Set["Set-Cookie scout_session=<br/>httpOnly + Secure(prod)<br/>+ SameSite=Lax<br/>+ maxAge=1an<br/>+ Path=/"]
     end
 
     subgraph Verify["Vérification (à chaque requête)"]
-        Read[cookies().get('scout_session')]
+        Read["cookies().get('scout_session')"]
         Split[Split sur '.']
         ReHmac[Re-calcul du HMAC<br/>sur le payload reçu]
         Compare{timingSafeEqual<br/>signatures ?}
@@ -685,7 +685,7 @@ flowchart TB
     Compare -->|OK| Cross
     Compare -->|KO| Reject1([401 silencieux<br/>UI affiche modal])
     Cross -->|Row trouvée| Accept([Session valide])
-    Cross -->|Pas de row| Reject2([401, cookie invalidé])
+    Cross -->|Pas de row| Reject2(["401, cookie invalidé"])
 
     style Sign fill:#fff1ea
     style Verify fill:#e8f4ff
@@ -723,7 +723,7 @@ Les logs serveur sont structurés (`pino`), corrélés par requête (`x-request-
 flowchart TB
     subgraph App["Application Scout"]
         Mid[middleware.ts<br/>Injecte x-request-id]
-        Route[Route API<br/>requestLogger(request)]
+        Route["Route API<br/>requestLogger(request)"]
         Server[Code serveur<br/>logger.info / warn / error]
     end
 
