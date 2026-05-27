@@ -49,7 +49,13 @@ export async function POST(request: Request) {
     return errorResponse("Requête invalide.", 400);
   }
 
-  const parsed = RequestSchema.safeParse(payload);
+  // Le rapport vient de notre propre backend mais il a transité via
+  // sessionStorage côté client. Certaines APIs externes renvoient
+  // explicitement `null` au lieu d'omettre la clé, ce qui casse les
+  // `.optional()` Zod (qui n'acceptent que `undefined`). On normalise.
+  const cleaned = stripNullDeep(payload);
+
+  const parsed = RequestSchema.safeParse(cleaned);
   if (!parsed.success) {
     return errorResponse(
       parsed.error.issues.map((i) => i.message).join(" "),
@@ -109,4 +115,30 @@ export async function POST(request: Request) {
 
 function errorResponse(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
+}
+
+/**
+ * Supprime récursivement les valeurs `null` d'un objet pour les rendre
+ * équivalentes à `undefined` (que Zod `.optional()` accepte). Les
+ * tableaux préservent leur ordre et leur longueur — les éléments null
+ * sont remplacés par `undefined` (ce qui suffit pour les schémas qu'on
+ * passe ici puisqu'on n'a pas d'arrays optionnels mélangeant null et
+ * valeurs réelles).
+ */
+function stripNullDeep(value: unknown): unknown {
+  if (value === null) return undefined;
+  if (Array.isArray(value)) {
+    return value.map(stripNullDeep);
+  }
+  if (typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      const cleaned = stripNullDeep(v);
+      if (cleaned !== undefined) {
+        out[k] = cleaned;
+      }
+    }
+    return out;
+  }
+  return value;
 }
