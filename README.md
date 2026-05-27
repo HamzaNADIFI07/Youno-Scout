@@ -3,8 +3,8 @@
 > Module candidat pour **Konsole**, le SaaS Revenue Engineering de **Youno**.
 > Donnez une URL, Scout retourne un brief commercial exploitable en quelques secondes.
 
-- **Application en ligne** : _à compléter après déploiement Vercel_
-- **Démonstration vidéo** : _à compléter_
+- **Application en ligne** :https://youno-scout.vercel.app/
+- **Démonstration vidéo** :
 - **Repo GitHub** : [HamzaNADIFI07/Youno-Scout](https://github.com/HamzaNADIFI07/Youno-Scout)
 
 ---
@@ -1424,27 +1424,3 @@ Scout reste **léger et stateless** côté business : il fait l'analyse, retourn
 | Différenciation Cas pratique | "J'ai codé l'API" | "J'ai pensé Acquisition → Revenu" |
 
 C'est cette dernière ligne qui résume le mieux l'intention derrière Scout : ne pas s'arrêter à un outil qui répond au brief, mais montrer comment ce même outil peut devenir **une brique du business de Youno**.
-
----
-
-## Sources et références
-
-[^em]: **Engineering as Marketing** — Gabriel Weinberg & Justin Mares, *Traction: How Any Startup Can Achieve Explosive Customer Growth*, Portfolio (2015), chapitre 14. Le concept est repris dans la majorité des frameworks B2B growth modernes (First Round, Reforge, GrowthHackers).
-
-[^hubspot]: **HubSpot Website Grader** — [websitegrader.com](https://websitegrader.com). Outil gratuit lancé en 2007 par Dharmesh Shah (CTO HubSpot). Une étude de cas de HubSpot rapporte plusieurs millions de leads générés depuis le lancement, devenu canal d'acquisition de référence cité dans le livre *Inbound Marketing* (Halligan & Shah, Wiley, 2009).
-
-[^6sense]: **Signal-Based Selling** — [6sense, *The State of Predictable Revenue Report* (2024)](https://6sense.com/resources/). Les éditeurs B2B qui exploitent des signaux d'intention voient en moyenne +35 % de win rate sur leur pipeline outbound.
-
-[^clay]: **Clay** — [clay.com](https://clay.com). Plateforme d'enrichissement et orchestration go-to-market utilisée par OpenAI, Notion, Vercel, Anthropic. Levée Series B de 46 M$ en 2024. Permet d'enrichir un simple email pro avec 100+ champs en quelques secondes.
-
-[^aarrr]: **AARRR Pirate Metrics** — Dave McClure (500 Startups), *Startup Metrics for Pirates*, présentation Startonomics 2007 ([slides](https://www.slideshare.net/dmc500hats/startup-metrics-for-pirates-long-version)). Framework devenu standard pour structurer un funnel d'acquisition / activation / rétention / revenu / référence.
-
-[^plg]: **Product-Led Growth** — Wes Bush, *Product-Led Growth: How to Build a Product That Sells Itself*, Product-Led Institute (2019). Le PLG consiste à utiliser le produit lui-même comme principal moteur d'acquisition, de conversion et d'expansion.
-
-[^openview]: **OpenView 2024 Product-Led Growth Index** — [openviewpartners.com/product-benchmarks/](https://openviewpartners.com/product-benchmarks/). Sur >900 SaaS B2B étudiés, 58 % déclarent que le PLG est leur premier canal d'acquisition en 2024 (vs. 38 % en 2021).
-
----
-
-## Licence
-
-Projet privé à finalité de démonstration, dans le cadre du processus de recrutement Youno (Alternance Développeur).
