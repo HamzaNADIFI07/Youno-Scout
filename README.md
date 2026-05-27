@@ -1423,3 +1423,21 @@ Scout reste **léger et stateless** côté business : il fait l'analyse, retourn
 | Positionnement | Outil isolé | Première brique du funnel Youno |
 
 L'intention produit derrière Scout : ne pas se limiter à un outil qui répond à un besoin ponctuel, mais en faire **une brique du business de Youno** qui alimente Konsole en leads qualifiés dès l'entrée du funnel.
+
+---
+
+## Sources et références
+
+[^em]: **Engineering as Marketing** — Gabriel Weinberg & Justin Mares, *Traction: How Any Startup Can Achieve Explosive Customer Growth*, Portfolio (2015), chapitre 14. Le concept est repris dans la majorité des frameworks B2B growth modernes (First Round, Reforge, GrowthHackers).
+
+[^hubspot]: **HubSpot Website Grader** — [websitegrader.com](https://websitegrader.com). Outil gratuit lancé en 2007 par Dharmesh Shah (CTO HubSpot). Une étude de cas de HubSpot rapporte plusieurs millions de leads générés depuis le lancement, devenu canal d'acquisition de référence cité dans le livre *Inbound Marketing* (Halligan & Shah, Wiley, 2009).
+
+[^6sense]: **Signal-Based Selling** — [6sense, *The State of Predictable Revenue Report* (2024)](https://6sense.com/resources/). Les éditeurs B2B qui exploitent des signaux d'intention voient en moyenne +35 % de win rate sur leur pipeline outbound.
+
+[^clay]: **Clay** — [clay.com](https://clay.com). Plateforme d'enrichissement et orchestration go-to-market utilisée par OpenAI, Notion, Vercel, Anthropic. Levée Series B de 46 M$ en 2024. Permet d'enrichir un simple email pro avec 100+ champs en quelques secondes.
+
+[^aarrr]: **AARRR Pirate Metrics** — Dave McClure (500 Startups), *Startup Metrics for Pirates*, présentation Startonomics 2007 ([slides](https://www.slideshare.net/dmc500hats/startup-metrics-for-pirates-long-version)). Framework devenu standard pour structurer un funnel d'acquisition / activation / rétention / revenu / référence.
+
+[^plg]: **Product-Led Growth** — Wes Bush, *Product-Led Growth: How to Build a Product That Sells Itself*, Product-Led Institute (2019). Le PLG consiste à utiliser le produit lui-même comme principal moteur d'acquisition, de conversion et d'expansion.
+
+[^openview]: **OpenView 2024 Product-Led Growth Index** — [openviewpartners.com/product-benchmarks/](https://openviewpartners.com/product-benchmarks/). Sur >900 SaaS B2B étudiés, 58 % déclarent que le PLG est leur premier canal d'acquisition en 2024 (vs. 38 % en 2021).
