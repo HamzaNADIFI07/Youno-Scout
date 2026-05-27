@@ -262,7 +262,7 @@ flowchart TB
     Start(["Click 'Passer en Premium'"])
 
     Step1[Étape 1<br/>Saisie URL cible]
-    Step2[Étape 2<br/>Description du business<br/>offre + ICP + signaux d'achat<br/>+ anti-signaux]
+    Step2["Étape 2<br/>Description du business<br/>offre + ICP + signaux d'achat<br/>+ anti-signaux"]
     Step3[Étape 3<br/>Édition des signaux générés<br/>+ chat langage naturel]
     Step4[Étape 4<br/>Sélection APIs + lancement]
 
@@ -272,11 +272,11 @@ flowchart TB
         Quality{Description<br/>exploitable ?}
         Reject[LLM appelle<br/>report_invalid_input]
         Generate[LLM appelle<br/>submit_signals]
-        FrError[Message FR clair :<br/>'L'offre n'est pas décrite,<br/>l'ICP cible n'est pas précisé']
+        FrError["Message FR clair :<br/>'L'offre n'est pas décrite,<br/>l'ICP cible n'est pas précisé'"]
     end
 
     Edit{User veut modifier ?}
-    NLChat[Chat NL :<br/>'Retire X', 'Ajoute Y']
+    NLChat["Chat NL :<br/>'Retire X', 'Ajoute Y'"]
     Regen[Régénère via LLM<br/>en passant les signaux courants]
 
     Final[POST /api/analyze<br/>avec customSignals]
@@ -412,11 +412,11 @@ Chaque appel logge le provider effectif :
 ```mermaid
 flowchart LR
     Input[User input<br/>+ system prompt]
-    LLM[LLM avec<br/>tool_choice: 'required']
+    LLM["LLM avec<br/>tool_choice: 'required'"]
 
     subgraph Choice["Le LLM choisit"]
-        Tool1[submit_signals<br/>params: { signals: [...] }]
-        Tool2[report_invalid_input<br/>params: { reason: string }]
+        Tool1["submit_signals<br/>params: { signals: [...] }"]
+        Tool2["report_invalid_input<br/>params: { reason: string }"]
     end
 
     Result1[8-12 signaux<br/>standard B2B]
@@ -459,7 +459,7 @@ L'utilisateur active les APIs au cas par cas via 3 checkboxes dans l'UI.
 ```mermaid
 flowchart LR
     UI[Utilisateur coche les APIs]
-    Req[POST /api/analyze<br/>{ enabledApis }]
+    Req["POST /api/analyze<br/>{ enabledApis }"]
 
     Orchestrator[runEnrichments]
 
@@ -475,7 +475,7 @@ flowchart LR
         Merge3[Infos juridiques<br/>API > scraping]
     end
 
-    Errors[Erreurs collectées<br/>dans enrichment.errors[]]
+    Errors["Erreurs collectées<br/>dans enrichment.errors[]"]
 
     UI --> Req
     Req --> Orchestrator
@@ -656,7 +656,7 @@ Le template ([src/server/subscribers/email.ts](src/server/subscribers/email.ts))
 ```mermaid
 flowchart TB
     subgraph Sign["Signature (à la vérification)"]
-        Pay[Payload :<br/>{ sid, email, iat }]
+        Pay["Payload :<br/>{ sid, email, iat }"]
         B64[JSON → base64url]
         Hmac[HMAC-SHA256<br/>avec SCOUT_SESSION_SECRET]
         Token["Token =<br/>base64url(payload)<br/>.<br/>hmac"]
@@ -668,7 +668,7 @@ flowchart TB
 
     subgraph Verify["Vérification (à chaque requête)"]
         Read["cookies().get('scout_session')"]
-        Split[Split sur '.']
+        Split["Split sur '.'"]
         ReHmac[Re-calcul du HMAC<br/>sur le payload reçu]
         Compare{timingSafeEqual<br/>signatures ?}
         Cross[Cross-check DB :<br/>SELECT WHERE email=...<br/>AND verified=true]
@@ -729,7 +729,7 @@ flowchart TB
 
     subgraph Pino["src/lib/logger.ts"]
         Base[pino instance<br/>service=scout, env, level]
-        Child[child logger<br/>{ requestId }]
+        Child["child logger<br/>{ requestId }"]
         Redact[Redaction<br/>password, token, apiKey,<br/>Authorization, cookie...]
         Format{Format selon<br/>env}
         Pretty[pino-pretty<br/>colorisé, lisible]
@@ -1181,7 +1181,7 @@ flowchart LR
 
     Loop{Pour chaque<br/>fichier .sql}
     Skip[Déjà appliqué :<br/>skip]
-    Apply[Strip commentaires --<br/>split sur ';\\n'<br/>exec chaque statement]
+    Apply["Strip commentaires --<br/>split sur ';\\n'<br/>exec chaque statement"]
     Record[INSERT INTO _migrations<br/>name = file.sql]
 
     Cmd --> Script
@@ -1327,7 +1327,7 @@ flowchart LR
 
     subgraph Activation["2. Activation"]
         AC1[User tape une URL<br/>+ confirme son email]
-        AC2[Score ICP affiché<br/>= moment 'Aha !']
+        AC2["Score ICP affiché<br/>= moment 'Aha !'"]
     end
 
     subgraph Retention["3. Rétention"]
@@ -1337,7 +1337,7 @@ flowchart LR
     end
 
     subgraph Revenue["4. Revenu"]
-        RV1[Enrichissement Clay<br/>sur l'email pro]
+        RV1["Enrichissement Clay<br/>sur l'email pro"]
         RV2[Fit Score Youno calculé]
         RV3[Score > 70 →<br/>SDR Slack alert]
         RV4[Démo Konsole bookée]
@@ -1388,7 +1388,7 @@ flowchart LR
 
     subgraph Triggers["Triggers"]
         T1[Score > 80 →<br/>Alerte Slack]
-        T2[Signal 'funding' →<br/>Séquence outbound]
+        T2["Signal 'funding' →<br/>Séquence outbound"]
         T3[Stack HubSpot →<br/>Branche workflow A]
     end
 
