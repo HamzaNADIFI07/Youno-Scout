@@ -4,6 +4,7 @@ import { ContactsCard } from "@/components/result/contacts-card";
 import { DescriptionCard } from "@/components/result/description-card";
 import { EnrichmentCard } from "@/components/result/enrichment-card";
 import { LegalCard } from "@/components/result/legal-card";
+import { PdfExportPanel } from "@/components/result/pdf-export-panel";
 import { PeopleCard } from "@/components/result/people-card";
 import { ScoreCard } from "@/components/result/score-card";
 import { SignalsCard } from "@/components/result/signals-card";
@@ -16,9 +17,13 @@ type Props = {
 };
 
 export function ResultView({ result }: Props) {
+  const isPremium = result.mode === "premium";
+
   return (
     <div className="space-y-4">
       <CompanyHeader result={result} />
+
+      {isPremium ? <PdfExportPanel result={result} /> : null}
 
       <DescriptionCard result={result} />
 

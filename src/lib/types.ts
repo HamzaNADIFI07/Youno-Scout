@@ -260,6 +260,7 @@ export const AnalysisResultSchema = z.object({
     ogImage: z.string().optional(),
     language: z.string().optional(),
   }),
+  mode: z.enum(["standard", "premium"]).optional(),
 });
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
 

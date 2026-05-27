@@ -145,7 +145,7 @@ export default function PremiumPage() {
         return;
       }
       const result = (await response.json()) as AnalysisResult;
-      storeAnalysisResult(result);
+      storeAnalysisResult({ ...result, mode: "premium" });
       router.push("/results");
     } catch {
       setAnalysisError(
