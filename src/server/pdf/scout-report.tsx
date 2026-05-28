@@ -119,36 +119,43 @@ function GridBackground() {
   const vLines = Math.ceil(PAGE_WIDTH / GRID_STEP);
   const hLines = Math.ceil(PAGE_HEIGHT / GRID_STEP);
   return (
-    <Svg
-      style={{ position: "absolute", top: 0, left: 0 }}
-      width={PAGE_WIDTH}
-      height={PAGE_HEIGHT}
+    <View
+      fixed
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: PAGE_WIDTH,
+        height: PAGE_HEIGHT,
+      }}
     >
-      {Array.from({ length: vLines + 1 }).map((_, i) => (
-        <Line
-          key={`v${i}`}
-          x1={i * GRID_STEP}
-          y1={0}
-          x2={i * GRID_STEP}
-          y2={PAGE_HEIGHT}
-          strokeWidth={0.5}
-          stroke="#D05C35"
-          strokeOpacity={0.1}
-        />
-      ))}
-      {Array.from({ length: hLines + 1 }).map((_, i) => (
-        <Line
-          key={`h${i}`}
-          x1={0}
-          y1={i * GRID_STEP}
-          x2={PAGE_WIDTH}
-          y2={i * GRID_STEP}
-          strokeWidth={0.5}
-          stroke="#D05C35"
-          strokeOpacity={0.1}
-        />
-      ))}
-    </Svg>
+      <Svg width={PAGE_WIDTH} height={PAGE_HEIGHT}>
+        {Array.from({ length: vLines + 1 }).map((_, i) => (
+          <Line
+            key={`v${i}`}
+            x1={i * GRID_STEP}
+            y1={0}
+            x2={i * GRID_STEP}
+            y2={PAGE_HEIGHT}
+            strokeWidth={0.5}
+            stroke="#D05C35"
+            strokeOpacity={0.1}
+          />
+        ))}
+        {Array.from({ length: hLines + 1 }).map((_, i) => (
+          <Line
+            key={`h${i}`}
+            x1={0}
+            y1={i * GRID_STEP}
+            x2={PAGE_WIDTH}
+            y2={i * GRID_STEP}
+            strokeWidth={0.5}
+            stroke="#D05C35"
+            strokeOpacity={0.1}
+          />
+        ))}
+      </Svg>
+    </View>
   );
 }
 
@@ -222,7 +229,7 @@ function ScoreBreakdown({ icp }: { icp: AnalysisResult["icp"] }) {
             i === icp.breakdown.length - 1 ? styles.signalRowLast : {},
           ]}
         >
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, flexDirection: "column", paddingRight: 8 }}>
             <Text style={styles.signalLabel}>{entry.category}</Text>
             <Text style={[styles.bodyMuted, { fontSize: 9, marginTop: 2 }]}>
               {entry.reasoning}
@@ -260,7 +267,7 @@ function SignalsTable({ signals }: { signals: AnalysisResult["signals"] }) {
             i === sorted.length - 1 ? styles.signalRowLast : {},
           ]}
         >
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, flexDirection: "column", paddingRight: 8 }}>
             <Text style={styles.signalLabel}>{signal.label}</Text>
             {signal.value ? (
               <Text

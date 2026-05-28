@@ -37,22 +37,27 @@ export function ensureFontsRegistered() {
   if (fontsRegistered) return;
   const base = `${getAppUrl().replace(/\/$/, "")}/fonts`;
 
+  // Variable TTF officielles Google Fonts. Un seul fichier par font, fontkit
+  // ajuste l'axe wght en fonction du fontWeight demandé. Avantage par rapport
+  // aux WOFF subset @fontsource : les ligatures `fi` / `fl` sont préservées
+  // (les WOFF latin minimaux fournis par @fontsource provoquent un bug
+  // d'omission de caractères dans @react-pdf v4 / fontkit).
   Font.register({
     family: "Rethink Sans",
     fonts: [
-      { src: `${base}/RethinkSans-400.woff`, fontWeight: 400 },
-      { src: `${base}/RethinkSans-600.woff`, fontWeight: 600 },
-      { src: `${base}/RethinkSans-700.woff`, fontWeight: 700 },
-      { src: `${base}/RethinkSans-800.woff`, fontWeight: 800 },
+      { src: `${base}/RethinkSans.ttf`, fontWeight: 400 },
+      { src: `${base}/RethinkSans.ttf`, fontWeight: 600 },
+      { src: `${base}/RethinkSans.ttf`, fontWeight: 700 },
+      { src: `${base}/RethinkSans.ttf`, fontWeight: 800 },
     ],
   });
 
   Font.register({
     family: "DM Sans",
     fonts: [
-      { src: `${base}/DMSans-400.woff`, fontWeight: 400 },
-      { src: `${base}/DMSans-500.woff`, fontWeight: 500 },
-      { src: `${base}/DMSans-700.woff`, fontWeight: 700 },
+      { src: `${base}/DMSans.ttf`, fontWeight: 400 },
+      { src: `${base}/DMSans.ttf`, fontWeight: 500 },
+      { src: `${base}/DMSans.ttf`, fontWeight: 700 },
     ],
   });
 
