@@ -21,53 +21,38 @@ export const COLORS = {
 } as const;
 
 /**
- * Enregistrement des fonts via Google Fonts (URL directe).
- * React-PDF récupère les fichiers TTF au moment du render serveur.
- * Embedding via fonts.gstatic.com plutôt que d'inclure les fichiers dans le
- * bundle — limite la taille de la fonction Vercel.
+ * Enregistrement des fonts servies depuis l'app (public/fonts).
+ * On charge des fichiers WOFF statiques (un par poids) plutôt que des
+ * variants Google Fonts CDN : URLs stables, pas de 404 surprise quand
+ * Google bump une version, et bundle Vercel toujours <50 MB grâce au
+ * cache HTTP standard.
  */
 let fontsRegistered = false;
 
+function getAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
+
 export function ensureFontsRegistered() {
   if (fontsRegistered) return;
+  const base = `${getAppUrl().replace(/\/$/, "")}/fonts`;
 
   Font.register({
     family: "Rethink Sans",
     fonts: [
-      {
-        src: "https://fonts.gstatic.com/s/rethinksans/v3/AMOQz4WBmW7FZNlb5oyU0YOyqp_NLTzfprp4.ttf",
-        fontWeight: 400,
-      },
-      {
-        src: "https://fonts.gstatic.com/s/rethinksans/v3/AMOQz4WBmW7FZNlb5oyU0YOyqp_NMzz5prp4.ttf",
-        fontWeight: 600,
-      },
-      {
-        src: "https://fonts.gstatic.com/s/rethinksans/v3/AMOQz4WBmW7FZNlb5oyU0YOyqp_NJDzhprp4.ttf",
-        fontWeight: 700,
-      },
-      {
-        src: "https://fonts.gstatic.com/s/rethinksans/v3/AMOQz4WBmW7FZNlb5oyU0YOyqp_NIjzkprp4.ttf",
-        fontWeight: 800,
-      },
+      { src: `${base}/RethinkSans-400.woff`, fontWeight: 400 },
+      { src: `${base}/RethinkSans-600.woff`, fontWeight: 600 },
+      { src: `${base}/RethinkSans-700.woff`, fontWeight: 700 },
+      { src: `${base}/RethinkSans-800.woff`, fontWeight: 800 },
     ],
   });
 
   Font.register({
     family: "DM Sans",
     fonts: [
-      {
-        src: "https://fonts.gstatic.com/s/dmsans/v15/rP2tp2ywxg089UriI5-g4vlH9VoD8Cmcqbu0.ttf",
-        fontWeight: 400,
-      },
-      {
-        src: "https://fonts.gstatic.com/s/dmsans/v15/rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqbsM.ttf",
-        fontWeight: 500,
-      },
-      {
-        src: "https://fonts.gstatic.com/s/dmsans/v15/rP2tp2ywxg089UriI5-g4vlH9VoD8Cmcqbu0.ttf",
-        fontWeight: 700,
-      },
+      { src: `${base}/DMSans-400.woff`, fontWeight: 400 },
+      { src: `${base}/DMSans-500.woff`, fontWeight: 500 },
+      { src: `${base}/DMSans-700.woff`, fontWeight: 700 },
     ],
   });
 
