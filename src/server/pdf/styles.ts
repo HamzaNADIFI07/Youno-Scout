@@ -1,4 +1,4 @@
-import { Font, StyleSheet } from "@react-pdf/renderer";
+import { StyleSheet } from "@react-pdf/renderer";
 
 /**
  * Palette Scout / Youno, alignée sur la charte de l'app.
@@ -21,51 +21,30 @@ export const COLORS = {
 } as const;
 
 /**
- * Enregistrement des fonts servies depuis l'app (public/fonts).
- * On charge des fichiers WOFF statiques (un par poids) plutôt que des
- * variants Google Fonts CDN : URLs stables, pas de 404 surprise quand
- * Google bump une version, et bundle Vercel toujours <50 MB grâce au
- * cache HTTP standard.
+ * Pas d'enregistrement de fonts customisées : on utilise les fonts PDF
+ * "base 14" (Helvetica / Helvetica-Bold) embarquées dans tous les viewers
+ * PDF du monde. Plusieurs tentatives avec DM Sans / Rethink Sans en TTF
+ * variable et WOFF2 wght-only ont échoué :
+ *
+ *   - Variable TTF multi-axes (opsz + wght) : les ligatures fi / fl sont
+ *     rendues comme glyphes de largeur zéro par fontkit ("Cloudflare" →
+ *     "Cloudfare", "confirmé" → "confrmé").
+ *   - Variable WOFF2 wght-only : fontkit crashe à l'embedding du subset
+ *     (RangeError "Offset is outside the bounds of the DataView" au
+ *     niveau de _addGlyph / setUint16).
+ *   - WOFF subset latin per-weight : la table "Alphabetic Presentation
+ *     Forms" (où vivent fi / fl) est tronquée par le subsetter, même
+ *     symptôme que la variante multi-axes.
+ *
+ * Le rendu PDF garde donc toute la charte Youno côté palette, layout,
+ * grille de fond, logo, copy. Seule la typo body / heading bascule sur
+ * Helvetica — la font PDF la plus largement supportée et la plus neutre
+ * pour un rapport professionnel.
  */
-let fontsRegistered = false;
-
-function getAppUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-}
-
 export function ensureFontsRegistered() {
-  if (fontsRegistered) return;
-  const base = `${getAppUrl().replace(/\/$/, "")}/fonts`;
-
-  // Variable fonts à axe unique (wght). Les variantes multi-axes (opsz + wght)
-  // de DM Sans provoquent un bug @react-pdf v4 / fontkit : les ligatures `fi`
-  // et `fl` sont rendues comme glyphes de largeur zéro, omettant visuellement
-  // le `i` / `l` ("confirmé" → "confrmé", "fit" → "ft", "Cloudflare" →
-  // "Cloudfare"). Avec la variante wght-only, fontkit ne gère qu'un seul axe
-  // et applique correctement les substitutions OpenType.
-  Font.register({
-    family: "Rethink Sans",
-    fonts: [
-      { src: `${base}/RethinkSans-wght.woff2`, fontWeight: 400 },
-      { src: `${base}/RethinkSans-wght.woff2`, fontWeight: 600 },
-      { src: `${base}/RethinkSans-wght.woff2`, fontWeight: 700 },
-      { src: `${base}/RethinkSans-wght.woff2`, fontWeight: 800 },
-    ],
-  });
-
-  Font.register({
-    family: "DM Sans",
-    fonts: [
-      { src: `${base}/DMSans-wght.woff2`, fontWeight: 400 },
-      { src: `${base}/DMSans-wght.woff2`, fontWeight: 500 },
-      { src: `${base}/DMSans-wght.woff2`, fontWeight: 700 },
-    ],
-  });
-
-  // Évite les warnings "missing font" sur certains caractères Unicode.
-  Font.registerHyphenationCallback((word) => [word]);
-
-  fontsRegistered = true;
+  // Volontairement vide : aucune font à enregistrer, on s'appuie sur
+  // les built-ins. La fonction reste exportée pour ne pas avoir à
+  // toucher les callers (scout-report.tsx).
 }
 
 /**
@@ -78,7 +57,7 @@ export const styles = StyleSheet.create({
     paddingTop: 48,
     paddingBottom: 56,
     paddingHorizontal: 40,
-    fontFamily: "DM Sans",
+    fontFamily: "Helvetica",
     fontSize: 10,
     color: COLORS.text,
     position: "relative",
@@ -104,7 +83,7 @@ export const styles = StyleSheet.create({
   },
   brandLogo: { height: 22 },
   brandTagline: {
-    fontFamily: "Rethink Sans",
+    fontFamily: "Helvetica-Bold",
     fontSize: 9,
     fontWeight: 600,
     color: COLORS.accent,
@@ -114,7 +93,7 @@ export const styles = StyleSheet.create({
 
   // Cover
   coverTitle: {
-    fontFamily: "Rethink Sans",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 700,
     fontSize: 28,
     lineHeight: 1.15,
@@ -143,21 +122,21 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   coverScoreBig: {
-    fontFamily: "Rethink Sans",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 800,
     fontSize: 56,
     lineHeight: 1,
     color: COLORS.accent,
   },
   coverScoreUnit: {
-    fontFamily: "Rethink Sans",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 600,
     fontSize: 18,
     color: COLORS.textMuted,
     marginLeft: 6,
   },
   coverVerdict: {
-    fontFamily: "Rethink Sans",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 600,
     fontSize: 14,
     color: COLORS.text,
@@ -166,7 +145,7 @@ export const styles = StyleSheet.create({
 
   // Sections
   sectionTitle: {
-    fontFamily: "Rethink Sans",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 700,
     fontSize: 14,
     color: COLORS.text,
