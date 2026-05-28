@@ -368,7 +368,9 @@ function PeopleList({ people }: { people: AnalysisResult["people"] }) {
             i === people.length - 1 ? styles.signalRowLast : {},
           ]}
         >
-          <Text style={styles.signalLabel}>{person.fullName}</Text>
+          <Text style={[styles.signalLabel, { flex: 1 }]}>
+            {person.fullName}
+          </Text>
           <Text style={[styles.signalMeta, { width: 220, textAlign: "right" }]}>
             {person.role ?? ""}
           </Text>

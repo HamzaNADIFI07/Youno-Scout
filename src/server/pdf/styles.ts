@@ -180,7 +180,7 @@ export const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 600,
     color: COLORS.textMuted,
-    width: 100,
+    width: 150,
   },
   kvValue: { fontSize: 9, color: COLORS.text, flex: 1 },
 
@@ -212,7 +212,7 @@ export const styles = StyleSheet.create({
     borderBottomColor: COLORS.border,
   },
   signalRowLast: { borderBottomWidth: 0 },
-  signalLabel: { fontSize: 10, fontWeight: 600, color: COLORS.text, flex: 1 },
+  signalLabel: { fontSize: 10, fontWeight: 600, color: COLORS.text },
   signalMeta: {
     fontSize: 9,
     color: COLORS.textMuted,
